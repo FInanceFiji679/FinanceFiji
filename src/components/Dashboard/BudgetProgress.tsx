@@ -22,7 +22,7 @@ const BudgetProgress: React.FC<BudgetProgressProps> = ({ budget, transactions })
       spent: needsSpent,
       budget: needsBudget,
       color: 'bg-emerald-500',
-      bgColor: 'bg-emerald-50',
+      bgColor: 'bg-emerald-500/20',
       percentage: budget.needsPercentage
     },
     {
@@ -30,15 +30,15 @@ const BudgetProgress: React.FC<BudgetProgressProps> = ({ budget, transactions })
       spent: wantsSpent,
       budget: wantsBudget,
       color: 'bg-amber-500',
-      bgColor: 'bg-amber-50',
+      bgColor: 'bg-amber-500/20',
       percentage: budget.wantsPercentage
     },
     {
       name: 'Responsibilities',
       spent: responsibilitiesSpent,
       budget: responsibilitiesBudget,
-      color: 'bg-sky-500',
-      bgColor: 'bg-sky-50',
+      color: 'bg-cyan-500',
+      bgColor: 'bg-cyan-500/20',
       percentage: budget.responsibilitiesPercentage
     }
   ];
@@ -53,19 +53,19 @@ const BudgetProgress: React.FC<BudgetProgressProps> = ({ budget, transactions })
           <div key={category.name} className={`p-4 rounded-lg ${category.bgColor}`}>
             <div className="flex justify-between items-center mb-2">
               <div>
-                <h4 className="font-medium text-gray-900">{category.name}</h4>
-                <p className="text-sm text-gray-600">{category.percentage}% of income</p>
+                <h4 className="font-medium text-white">{category.name}</h4>
+                <p className="text-sm text-slate-300">{category.percentage}% of income</p>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-gray-900">
+                <p className="font-semibold text-white">
                   {formatCurrency(category.spent)} / {formatCurrency(category.budget)}
                 </p>
-                <p className={`text-sm ${isOverBudget ? 'text-red-600' : 'text-gray-600'}`}>
+                <p className={`text-sm ${isOverBudget ? 'text-red-400' : 'text-slate-300'}`}>
                   {Math.round(progress)}% used
                 </p>
               </div>
             </div>
-            <div className="w-full bg-gray-200 rounded-full h-2">
+            <div className="w-full bg-slate-600 rounded-full h-2">
               <div
                 className={`h-2 rounded-full transition-all ${
                   isOverBudget ? 'bg-red-500' : category.color
@@ -74,7 +74,7 @@ const BudgetProgress: React.FC<BudgetProgressProps> = ({ budget, transactions })
               />
             </div>
             {isOverBudget && (
-              <p className="text-xs text-red-600 mt-1">
+              <p className="text-xs text-red-400 mt-1">
                 Over budget by {formatCurrency(category.spent - category.budget)}
               </p>
             )}

@@ -33,11 +33,10 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header currentView={currentView} onViewChange={setCurrentView} />
-      <main className="container mx-auto px-4 py-8">
+    <div className="h-screen bg-slate-900">
+      <Header currentView={currentView} onViewChange={setCurrentView}>
         {renderCurrentView()}
-      </main>
+      </Header>
     </div>
   );
 }

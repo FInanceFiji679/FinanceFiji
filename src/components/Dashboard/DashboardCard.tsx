@@ -20,35 +20,35 @@ const DashboardCard: React.FC<DashboardCardProps> = ({
   trend
 }) => {
   const colorClasses = {
-    blue: 'bg-gradient-to-br from-sky-50 to-sky-100 border-sky-200',
-    green: 'bg-gradient-to-br from-emerald-50 to-emerald-100 border-emerald-200',
-    yellow: 'bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200',
-    red: 'bg-gradient-to-br from-red-50 to-red-100 border-red-200',
-    purple: 'bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200'
+    blue: 'bg-gradient-to-br from-slate-800 to-slate-700 border-slate-600',
+    green: 'bg-gradient-to-br from-emerald-900/50 to-slate-800 border-emerald-700',
+    yellow: 'bg-gradient-to-br from-amber-900/50 to-slate-800 border-amber-700',
+    red: 'bg-gradient-to-br from-red-900/50 to-slate-800 border-red-700',
+    purple: 'bg-gradient-to-br from-purple-900/50 to-slate-800 border-purple-700'
   };
 
   const iconColorClasses = {
-    blue: 'text-sky-600 bg-sky-100',
-    green: 'text-emerald-600 bg-emerald-100',
-    yellow: 'text-amber-600 bg-amber-100',
-    red: 'text-red-600 bg-red-100',
-    purple: 'text-purple-600 bg-purple-100'
+    blue: 'text-cyan-400 bg-cyan-500/20',
+    green: 'text-emerald-400 bg-emerald-500/20',
+    yellow: 'text-amber-400 bg-amber-500/20',
+    red: 'text-red-400 bg-red-500/20',
+    purple: 'text-purple-400 bg-purple-500/20'
   };
 
   return (
-    <div className={`rounded-xl border p-6 transition-all hover:shadow-lg ${colorClasses[color]}`}>
+    <div className={`rounded-xl border p-6 transition-all hover:shadow-lg hover:shadow-slate-900/20 ${colorClasses[color]}`}>
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-sm font-medium text-gray-600">{title}</p>
-          <p className="text-2xl font-bold text-gray-900 mt-1">{value}</p>
+          <p className="text-sm font-medium text-slate-400">{title}</p>
+          <p className="text-2xl font-bold text-white mt-1">{value}</p>
           {trend && (
             <div className="flex items-center mt-2">
               <span className={`text-sm font-medium ${
-                trend.isPositive ? 'text-emerald-600' : 'text-red-600'
+                trend.isPositive ? 'text-emerald-400' : 'text-red-400'
               }`}>
                 {trend.isPositive ? '+' : ''}{trend.value}%
               </span>
-              <span className="text-sm text-gray-500 ml-1">vs last month</span>
+              <span className="text-sm text-slate-500 ml-1">vs last month</span>
             </div>
           )}
         </div>
