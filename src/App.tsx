@@ -1,42 +1,37 @@
 import React, { useState } from 'react';
 import Header from './components/Layout/Header';
-import Dashboard from './components/Dashboard/Dashboard';
-import IncomeTracker from './components/Income/IncomeTracker';
-import TransactionManager from './components/Transactions/TransactionManager';
-import WalletManager from './components/Wallets/WalletManager';
-import LoanManager from './components/Loans/LoanManager';
-import BudgetManager from './components/Budget/BudgetManager';
-import ReportsGenerator from './components/Reports/ReportsGenerator';
+import SettingsTab from './components/Settings/SettingsTab';
+import NeedsTab from './components/Tracking/NeedsTab';
+import WantsTab from './components/Tracking/WantsTab';
+import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
+import ReportsTab from './components/Reports/ReportsTab';
 
 function App() {
-  const [currentView, setCurrentView] = useState('dashboard');
+  const [currentView, setCurrentView] = useState('needs');
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case 'dashboard':
-        return <Dashboard />;
-      case 'income':
-        return <IncomeTracker />;
-      case 'transactions':
-        return <TransactionManager />;
-      case 'wallets':
-        return <WalletManager />;
-      case 'loans':
-        return <LoanManager />;
-      case 'budget':
-        return <BudgetManager />;
+      case 'needs':
+        return <NeedsTab />;
+      case 'wants':
+        return <WantsTab />;
+      case 'responsibilities':
+        return <ResponsibilitiesTab />;
+      case 'settings':
+        return <SettingsTab />;
       case 'reports':
-        return <ReportsGenerator />;
+        return <ReportsTab />;
       default:
-        return <Dashboard />;
+        return <NeedsTab />;
     }
   };
 
   return (
-    <div className="h-screen bg-slate-900">
-      <Header currentView={currentView} onViewChange={setCurrentView}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+      <Header currentView={currentView} onViewChange={setCurrentView} />
+      <main className="container mx-auto px-4 py-8">
         {renderCurrentView()}
-      </Header>
+      </main>
     </div>
   );
 }
