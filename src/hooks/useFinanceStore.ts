@@ -30,6 +30,17 @@ export interface MonthlyData {
   budgetSettings: BudgetSettings;
   totalSpent: number;
   remainingSalary: number;
+  wantWalletBalance: number;
+  bankBalance: number;
+}
+
+export interface WantWalletTransaction {
+  id: string;
+  amount: number;
+  type: 'accumulation' | 'withdrawal';
+  description: string;
+  date: string;
+  fromMonth?: string;
 }
 
 const STORAGE_KEY = 'financeflow-data';
@@ -46,6 +57,9 @@ export const useFinanceStore = () => {
   const [budgetSettings, setBudgetSettings] = useState<BudgetSettings>(defaultBudgetSettings);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [monthlyArchive, setMonthlyArchive] = useState<MonthlyData[]>([]);
+  const [wantWalletBalance, setWantWalletBalance] = useState<number>(0);
+  const [wantWalletTransactions, setWantWalletTransactions] = useState<WantWalletTransaction[]>([]);
+  const [bankBalance, setBankBalance] = useState<number>(0);
 
   // Load data from localStorage on mount
   useEffect(() => {
@@ -55,6 +69,9 @@ export const useFinanceStore = () => {
       setBudgetSettings(data.budgetSettings || defaultBudgetSettings);
       setTransactions(data.transactions || []);
       setMonthlyArchive(data.monthlyArchive || []);
+      setWantWalletBalance(data.wantWalletBalance || 0);
+      setWantWalletTransactions(data.wantWalletTransactions || []);
+      setBankBalance(data.bankBalance || 0);
     }
   }, []);
 
@@ -63,10 +80,13 @@ export const useFinanceStore = () => {
     const dataToSave = {
       budgetSettings,
       transactions,
-      monthlyArchive
+      monthlyArchive,
+      wantWalletBalance,
+      wantWalletTransactions,
+      bankBalance
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [budgetSettings, transactions, monthlyArchive]);
+  }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance]);
 
   const updateBudgetSettings = (newSettings: Partial<BudgetSettings>) => {
     setBudgetSettings(prev => ({ ...prev, ...newSettings }));
@@ -79,6 +99,30 @@ export const useFinanceStore = () => {
       date: new Date().toISOString()
     };
     setTransactions(prev => [newTransaction, ...prev]);
+
+    // Handle want wallet logic for wants category
+    if (transaction.category === 'wants') {
+      const wantsBudget = (budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100;
+      const currentWantsSpent = transactions
+        .filter(t => t.category === 'wants')
+        .reduce((sum, t) => sum + t.amount, 0) + transaction.amount;
+
+      if (currentWantsSpent > wantsBudget) {
+        const overspend = currentWantsSpent - wantsBudget;
+        if (wantWalletBalance >= overspend) {
+          // Deduct from want wallet
+          setWantWalletBalance(prev => prev - overspend);
+          const withdrawalTransaction: WantWalletTransaction = {
+            id: Date.now().toString() + '_withdrawal',
+            amount: overspend,
+            type: 'withdrawal',
+            description: `Overspend on: ${transaction.description}`,
+            date: new Date().toISOString()
+          };
+          setWantWalletTransactions(prev => [withdrawalTransaction, ...prev]);
+        }
+      }
+    }
   };
 
   const deleteTransaction = (id: string) => {
@@ -103,7 +147,36 @@ export const useFinanceStore = () => {
     }));
   };
 
+  const processMonthEnd = () => {
+    // Calculate unspent wants money and add to want wallet
+    const wantsBudget = (budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100;
+    const wantsSpent = transactions.filter(t => t.category === 'wants').reduce((sum, t) => sum + t.amount, 0);
+    const unspentWants = Math.max(0, wantsBudget - wantsSpent);
+
+    if (unspentWants > 0) {
+      setWantWalletBalance(prev => prev + unspentWants);
+      const accumulationTransaction: WantWalletTransaction = {
+        id: Date.now().toString() + '_accumulation',
+        amount: unspentWants,
+        type: 'accumulation',
+        description: `Unspent wants budget`,
+        date: new Date().toISOString(),
+        fromMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
+      };
+      setWantWalletTransactions(prev => [accumulationTransaction, ...prev]);
+    }
+
+    // Calculate and update bank balance
+    const totalSpent = transactions.reduce((sum, t) => sum + t.amount, 0);
+    const fixedExpensesTotal = budgetSettings.fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
+    const monthlyRemainder = budgetSettings.monthlyIncome - totalSpent - fixedExpensesTotal;
+    setBankBalance(prev => prev + monthlyRemainder);
+  };
+
   const resetMonth = () => {
+    // Process month end calculations first
+    processMonthEnd();
+
     // Archive current month data
     const currentMonth = new Date().toLocaleString('default', { month: 'long' });
     const currentYear = new Date().getFullYear();
@@ -118,7 +191,9 @@ export const useFinanceStore = () => {
       transactions: [...transactions],
       budgetSettings: { ...budgetSettings },
       totalSpent,
-      remainingSalary
+      remainingSalary,
+      wantWalletBalance,
+      bankBalance
     };
 
     setMonthlyArchive(prev => [monthlyData, ...prev]);
@@ -147,16 +222,25 @@ export const useFinanceStore = () => {
   const totalSpent = needsSpent + wantsSpent + responsibilitiesSpent + fixedExpensesTotal;
   const remainingSalary = budgetSettings.monthlyIncome - totalSpent;
 
+  // Calculate total allocated budget
+  const totalAllocated = needsBudget + wantsBudget + responsibilitiesBudget + fixedExpensesTotal;
+
   return {
     budgetSettings,
     transactions,
     monthlyArchive,
+    wantWalletBalance,
+    wantWalletTransactions,
+    bankBalance,
     updateBudgetSettings,
     addTransaction,
     deleteTransaction,
     addFixedExpense,
     deleteFixedExpense,
     resetMonth,
+    setWantWalletBalance,
+    setWantWalletTransactions,
+    setBankBalance,
     // Calculated values
     needsBudget,
     wantsBudget,
@@ -169,6 +253,7 @@ export const useFinanceStore = () => {
     responsibilitiesRemaining,
     fixedExpensesTotal,
     totalSpent,
-    remainingSalary
+    remainingSalary,
+    totalAllocated
   };
 };

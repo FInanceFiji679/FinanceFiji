@@ -4,6 +4,8 @@ import SettingsTab from './components/Settings/SettingsTab';
 import NeedsTab from './components/Tracking/NeedsTab';
 import WantsTab from './components/Tracking/WantsTab';
 import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
+import WantWalletTab from './components/Tracking/WantWalletTab';
+import BankTab from './components/Tracking/BankTab';
 import ReportsTab from './components/Reports/ReportsTab';
 
 function App() {
@@ -17,6 +19,10 @@ function App() {
         return <WantsTab />;
       case 'responsibilities':
         return <ResponsibilitiesTab />;
+      case 'want-wallet':
+        return <WantWalletTab />;
+      case 'bank':
+        return <BankTab />;
       case 'settings':
         return <SettingsTab />;
       case 'reports':

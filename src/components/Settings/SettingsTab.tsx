@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { Save, Plus, Trash2, DollarSign, Percent, Calculator } from 'lucide-react';
+import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
+import BudgetHeader from '../Shared/BudgetHeader';
 
 const SettingsTab: React.FC = () => {
   const { 
@@ -20,6 +21,7 @@ const SettingsTab: React.FC = () => {
 
   const [newExpense, setNewExpense] = useState({ name: '', amount: '' });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [saveSuccess, setSaveSuccess] = useState(false);
 
   const handlePercentageChange = (field: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -46,13 +48,16 @@ const SettingsTab: React.FC = () => {
     setFormData(newFormData);
   };
 
-  const handleSave = () => {
+  const handleSaveAll = () => {
     updateBudgetSettings({
       monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
       needsPercentage: parseFloat(formData.needsPercentage) || 0,
       wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
       responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
     });
+    
+    setSaveSuccess(true);
+    setTimeout(() => setSaveSuccess(false), 3000);
   };
 
   const handleAddExpense = () => {
@@ -70,10 +75,40 @@ const SettingsTab: React.FC = () => {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      {/* Budget Header */}
+      <BudgetHeader />
+
       {/* Header */}
       <div className="text-center">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Budget Settings</h1>
         <p className="text-slate-600">Configure your monthly income and budget allocations</p>
+      </div>
+
+      {/* Save All Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleSaveAll}
+          disabled={!isValidPercentage}
+          className={`flex items-center space-x-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+            saveSuccess 
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white'
+              : isValidPercentage
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {saveSuccess ? (
+            <>
+              <CheckCircle className="h-6 w-6" />
+              <span>Settings Saved!</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-6 w-6" />
+              <span>Save All Settings</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Monthly Income */}
@@ -85,32 +120,20 @@ const SettingsTab: React.FC = () => {
           <h2 className="text-xl font-semibold text-slate-800">Monthly Income</h2>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">
-              Total Monthly Salary/Income
-            </label>
-            <div className="relative">
-              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.monthlyIncome}
-                onChange={(e) => setFormData({ ...formData, monthlyIncome: e.target.value })}
-                className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                placeholder="0.00"
-              />
-            </div>
-          </div>
-          
-          <div className="flex items-end">
-            <button
-              onClick={handleSave}
-              className="flex items-center space-x-2 px-6 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl"
-            >
-              <Save className="h-5 w-5" />
-              <span>Save Settings</span>
-            </button>
+        <div className="max-w-md">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Total Monthly Salary/Income
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.monthlyIncome}
+              onChange={(e) => setFormData({ ...formData, monthlyIncome: e.target.value })}
+              className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="0.00"
+            />
           </div>
         </div>
       </div>
@@ -326,6 +349,7 @@ const SettingsTab: React.FC = () => {
         <h2 className="text-xl font-semibold text-slate-800 mb-4">Monthly Reset</h2>
         <p className="text-slate-600 mb-6">
           Reset all transactions and start a new month. Current data will be archived in Reports.
+          Unspent wants money will be added to your Want Wallet.
         </p>
         
         {!showResetConfirm ? (

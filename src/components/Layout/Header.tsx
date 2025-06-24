@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet } from 'lucide-react';
+import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2 } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
@@ -11,6 +11,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
     { id: 'needs', label: 'Needs', icon: Heart, color: 'emerald' },
     { id: 'wants', label: 'Wants', icon: ShoppingBag, color: 'amber' },
     { id: 'responsibilities', label: 'Responsibilities', icon: Shield, color: 'blue' },
+    { id: 'want-wallet', label: 'Want Wallet', icon: PiggyBank, color: 'pink' },
+    { id: 'bank', label: 'Bank', icon: Building2, color: 'indigo' },
     { id: 'reports', label: 'Reports', icon: FileText, color: 'purple' },
     { id: 'settings', label: 'Settings', icon: Settings, color: 'slate' }
   ];
@@ -27,6 +29,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
       blue: isActive 
         ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25' 
         : 'text-blue-600 hover:bg-blue-50',
+      pink: isActive 
+        ? 'bg-gradient-to-r from-pink-500 to-pink-600 text-white shadow-lg shadow-pink-500/25' 
+        : 'text-pink-600 hover:bg-pink-50',
+      indigo: isActive 
+        ? 'bg-gradient-to-r from-indigo-500 to-indigo-600 text-white shadow-lg shadow-indigo-500/25' 
+        : 'text-indigo-600 hover:bg-indigo-50',
       purple: isActive 
         ? 'bg-gradient-to-r from-purple-500 to-purple-600 text-white shadow-lg shadow-purple-500/25' 
         : 'text-purple-600 hover:bg-purple-50',

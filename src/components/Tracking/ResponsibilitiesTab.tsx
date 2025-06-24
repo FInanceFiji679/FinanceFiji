@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Receipt, Trash2, Shield, TrendingDown, Clock } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
+import BudgetHeader from '../Shared/BudgetHeader';
 import TransactionForm from './TransactionForm';
 
 const ResponsibilitiesTab: React.FC = () => {
@@ -8,7 +9,6 @@ const ResponsibilitiesTab: React.FC = () => {
     responsibilitiesBudget, 
     responsibilitiesSpent, 
     responsibilitiesRemaining, 
-    remainingSalary,
     transactions,
     deleteTransaction,
     budgetSettings,
@@ -24,6 +24,9 @@ const ResponsibilitiesTab: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
+      {/* Budget Header */}
+      <BudgetHeader />
+
       {/* Header with Budget Info */}
       <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl text-white p-8">
         <div className="flex items-center justify-between">
@@ -182,21 +185,6 @@ const ResponsibilitiesTab: React.FC = () => {
               <p>Start tracking your savings and investment expenses</p>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Remaining Salary Footer */}
-      <div className="bg-gradient-to-r from-slate-800 to-slate-900 rounded-2xl shadow-xl text-white p-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="text-lg font-semibold">Total Remaining Monthly Salary</h3>
-            <p className="text-slate-300">After all expenses and allocations</p>
-          </div>
-          <div className={`text-3xl font-bold ${
-            remainingSalary >= 0 ? 'text-emerald-400' : 'text-red-400'
-          }`}>
-            ${remainingSalary.toFixed(2)}
-          </div>
         </div>
       </div>
 
