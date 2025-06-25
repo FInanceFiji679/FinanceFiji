@@ -2,6 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Portrait optimization */
+@media (orientation: portrait) {
+  html {
+    font-size: 14px;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 /* Custom slider styles */
 .slider-emerald::-webkit-slider-thumb {
   appearance: none;
@@ -75,7 +88,7 @@
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -109,4 +122,96 @@ button:hover {
 
 button:active {
   transform: translateY(0);
+}
+
+/* Portrait-specific optimizations */
+@media (max-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+  
+  /* Ensure touch targets are at least 44px */
+  button, input, select {
+    min-height: 44px;
+  }
+  
+  /* Optimize spacing for mobile */
+  .space-y-8 > * + * {
+    margin-top: 1.5rem;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 1rem;
+  }
+  
+  /* Better text sizing for mobile */
+  .text-3xl {
+    font-size: 1.75rem;
+  }
+  
+  .text-2xl {
+    font-size: 1.5rem;
+  }
+  
+  .text-xl {
+    font-size: 1.25rem;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  html {
+    font-size: 13px;
+  }
+  
+  .text-4xl {
+    font-size: 1.75rem;
+  }
+  
+  .text-5xl {
+    font-size: 2rem;
+  }
+  
+  /* Reduce padding on very small screens */
+  .p-8 {
+    padding: 1rem;
+  }
+  
+  .p-6 {
+    padding: 0.75rem;
+  }
+  
+  .p-4 {
+    padding: 0.5rem;
+  }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+  .py-8 {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+  
+  .py-6 {
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+  
+  .space-y-8 > * + * {
+    margin-top: 1rem;
+  }
+  
+  .space-y-6 > * + * {
+    margin-top: 0.75rem;
+  }
+}
+
+/* Ensure proper viewport handling */
+@supports (-webkit-touch-callout: none) {
+  /* iOS Safari specific styles */
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
 }

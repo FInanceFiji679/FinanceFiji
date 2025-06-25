@@ -35,8 +35,10 @@ function App() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Header currentView={currentView} onViewChange={setCurrentView} />
-      <main className="container mx-auto px-4 py-8">
-        {renderCurrentView()}
+      <main className="w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto">
+        <div className="w-full">
+          {renderCurrentView()}
+        </div>
       </main>
     </div>
   );
