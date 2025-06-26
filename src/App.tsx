@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import SettingsTab from './components/Settings/SettingsTab';
 import NeedsTab from './components/Tracking/NeedsTab';
@@ -7,9 +7,19 @@ import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
 import WantWalletTab from './components/Tracking/WantWalletTab';
 import BankTab from './components/Tracking/BankTab';
 import ReportsTab from './components/Reports/ReportsTab';
+import TutorialModal from './components/Tutorial/TutorialModal';
+import { useFinanceStore } from './hooks/useFinanceStore';
 
 function App() {
   const [currentView, setCurrentView] = useState('needs');
+  const { hasSeenTutorial, markTutorialComplete } = useFinanceStore();
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  useEffect(() => {
+    if (!hasSeenTutorial) {
+      setShowTutorial(true);
+    }
+  }, [hasSeenTutorial]);
 
   const renderCurrentView = () => {
     switch (currentView) {
@@ -40,6 +50,12 @@ function App() {
           {renderCurrentView()}
         </div>
       </main>
+      
+      <TutorialModal
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+        onComplete={markTutorialComplete}
+      />
     </div>
   );
 }

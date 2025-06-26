@@ -15,6 +15,19 @@ export interface FixedExpense {
   amount: number;
 }
 
+export interface FinancialGoal {
+  id: string;
+  name: string;
+  targetAmount: number;
+  currentAmount: number;
+  description: string;
+  category: 'short-term' | 'medium-term' | 'long-term';
+  targetDate?: string;
+  priority: 'low' | 'medium' | 'high';
+  isCompleted: boolean;
+  createdDate: string;
+}
+
 export interface BudgetSettings {
   monthlyIncome: number;
   needsPercentage: number;
@@ -37,10 +50,20 @@ export interface MonthlyData {
 export interface WantWalletTransaction {
   id: string;
   amount: number;
-  type: 'accumulation' | 'withdrawal';
+  type: 'accumulation' | 'withdrawal' | 'goal-contribution';
   description: string;
   date: string;
   fromMonth?: string;
+  goalId?: string;
+}
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  unlockedDate: string;
+  type: 'savings' | 'goal' | 'streak' | 'milestone';
 }
 
 const STORAGE_KEY = 'financeflow-data';
@@ -60,22 +83,32 @@ export const useFinanceStore = () => {
   const [wantWalletBalance, setWantWalletBalance] = useState<number>(0);
   const [wantWalletTransactions, setWantWalletTransactions] = useState<WantWalletTransaction[]>([]);
   const [bankBalance, setBankBalance] = useState<number>(0);
+  const [goals, setGoals] = useState<FinancialGoal[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>([]);
+  const [hasSeenTutorial, setHasSeenTutorial] = useState<boolean>(false);
 
   // Load data from localStorage on mount
   useEffect(() => {
     const savedData = localStorage.getItem(STORAGE_KEY);
     if (savedData) {
-      const data = JSON.parse(savedData);
-      setBudgetSettings(data.budgetSettings || defaultBudgetSettings);
-      setTransactions(data.transactions || []);
-      setMonthlyArchive(data.monthlyArchive || []);
-      setWantWalletBalance(data.wantWalletBalance || 0);
-      setWantWalletTransactions(data.wantWalletTransactions || []);
-      setBankBalance(data.bankBalance || 0);
+      try {
+        const data = JSON.parse(savedData);
+        setBudgetSettings(data.budgetSettings || defaultBudgetSettings);
+        setTransactions(data.transactions || []);
+        setMonthlyArchive(data.monthlyArchive || []);
+        setWantWalletBalance(data.wantWalletBalance || 0);
+        setWantWalletTransactions(data.wantWalletTransactions || []);
+        setBankBalance(data.bankBalance || 0);
+        setGoals(data.goals || []);
+        setAchievements(data.achievements || []);
+        setHasSeenTutorial(data.hasSeenTutorial || false);
+      } catch (error) {
+        console.error('Error loading saved data:', error);
+      }
     }
   }, []);
 
-  // Save data to localStorage whenever it changes
+  // Auto-save data to localStorage whenever it changes
   useEffect(() => {
     const dataToSave = {
       budgetSettings,
@@ -83,10 +116,13 @@ export const useFinanceStore = () => {
       monthlyArchive,
       wantWalletBalance,
       wantWalletTransactions,
-      bankBalance
+      bankBalance,
+      goals,
+      achievements,
+      hasSeenTutorial
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
-  }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance]);
+  }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance, goals, achievements, hasSeenTutorial]);
 
   const updateBudgetSettings = (newSettings: Partial<BudgetSettings>) => {
     setBudgetSettings(prev => ({ ...prev, ...newSettings }));
@@ -116,13 +152,16 @@ export const useFinanceStore = () => {
             id: Date.now().toString() + '_withdrawal',
             amount: overspend,
             type: 'withdrawal',
-            description: `Overspend on: ${transaction.description}`,
+            description: `Overspend coverage: ${transaction.description}`,
             date: new Date().toISOString()
           };
           setWantWalletTransactions(prev => [withdrawalTransaction, ...prev]);
         }
       }
     }
+
+    // Check for achievements
+    checkForAchievements();
   };
 
   const deleteTransaction = (id: string) => {
@@ -145,6 +184,108 @@ export const useFinanceStore = () => {
       ...prev,
       fixedExpenses: prev.fixedExpenses.filter(e => e.id !== id)
     }));
+  };
+
+  const addGoal = (goal: Omit<FinancialGoal, 'id' | 'isCompleted' | 'createdDate'>) => {
+    const newGoal: FinancialGoal = {
+      ...goal,
+      id: Date.now().toString(),
+      isCompleted: false,
+      createdDate: new Date().toISOString()
+    };
+    setGoals(prev => [...prev, newGoal]);
+  };
+
+  const updateGoal = (id: string, updates: Partial<FinancialGoal>) => {
+    setGoals(prev => prev.map(goal => 
+      goal.id === id ? { ...goal, ...updates } : goal
+    ));
+    
+    // Check if goal was completed
+    const updatedGoal = goals.find(g => g.id === id);
+    if (updatedGoal && updates.currentAmount && updates.currentAmount >= updatedGoal.targetAmount) {
+      unlockAchievement({
+        id: `goal_${id}`,
+        name: 'Goal Achieved!',
+        description: `Congratulations! You've reached your goal: ${updatedGoal.name}`,
+        icon: '🎯',
+        type: 'goal'
+      });
+    }
+  };
+
+  const deleteGoal = (id: string) => {
+    setGoals(prev => prev.filter(g => g.id !== id));
+  };
+
+  const contributeToGoal = (goalId: string, amount: number) => {
+    const goal = goals.find(g => g.id === goalId);
+    if (!goal || wantWalletBalance < amount) return;
+
+    // Deduct from want wallet
+    setWantWalletBalance(prev => prev - amount);
+    
+    // Add to goal
+    updateGoal(goalId, { 
+      currentAmount: goal.currentAmount + amount,
+      isCompleted: goal.currentAmount + amount >= goal.targetAmount
+    });
+
+    // Record transaction
+    const contributionTransaction: WantWalletTransaction = {
+      id: Date.now().toString() + '_contribution',
+      amount,
+      type: 'goal-contribution',
+      description: `Contribution to: ${goal.name}`,
+      date: new Date().toISOString(),
+      goalId
+    };
+    setWantWalletTransactions(prev => [contributionTransaction, ...prev]);
+  };
+
+  const unlockAchievement = (achievement: Omit<Achievement, 'unlockedDate'>) => {
+    const existingAchievement = achievements.find(a => a.id === achievement.id);
+    if (existingAchievement) return;
+
+    const newAchievement: Achievement = {
+      ...achievement,
+      unlockedDate: new Date().toISOString()
+    };
+    setAchievements(prev => [...prev, newAchievement]);
+  };
+
+  const checkForAchievements = () => {
+    // First transaction achievement
+    if (transactions.length === 1) {
+      unlockAchievement({
+        id: 'first_transaction',
+        name: 'Getting Started',
+        description: 'You\'ve logged your first transaction!',
+        icon: '🌟',
+        type: 'milestone'
+      });
+    }
+
+    // Savings milestones
+    if (wantWalletBalance >= 100 && !achievements.find(a => a.id === 'saver_100')) {
+      unlockAchievement({
+        id: 'saver_100',
+        name: 'Smart Saver',
+        description: 'You\'ve saved $100 in your Want Wallet!',
+        icon: '💰',
+        type: 'savings'
+      });
+    }
+
+    if (wantWalletBalance >= 500 && !achievements.find(a => a.id === 'saver_500')) {
+      unlockAchievement({
+        id: 'saver_500',
+        name: 'Savings Champion',
+        description: 'Amazing! $500 saved in your Want Wallet!',
+        icon: '🏆',
+        type: 'savings'
+      });
+    }
   };
 
   const processMonthEnd = () => {
@@ -171,6 +312,8 @@ export const useFinanceStore = () => {
     const fixedExpensesTotal = budgetSettings.fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
     const monthlyRemainder = budgetSettings.monthlyIncome - totalSpent - fixedExpensesTotal;
     setBankBalance(prev => prev + monthlyRemainder);
+
+    checkForAchievements();
   };
 
   const resetMonth = () => {
@@ -200,6 +343,10 @@ export const useFinanceStore = () => {
     setTransactions([]);
   };
 
+  const markTutorialComplete = () => {
+    setHasSeenTutorial(true);
+  };
+
   // Calculate budget allocations
   const needsBudget = (budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100;
   const wantsBudget = (budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100;
@@ -223,7 +370,10 @@ export const useFinanceStore = () => {
   const remainingSalary = budgetSettings.monthlyIncome - totalSpent;
 
   // Calculate total allocated budget
-  const totalAllocated = needsBudget + wantsBudget + responsibilitiesBudget + fixedExpensesTotal;
+  const totalAllocated = needsBudget + wantsBudget + responsibilitiesBudget;
+
+  // Calculate savings rate
+  const savingsRate = budgetSettings.monthlyIncome > 0 ? (wantWalletBalance / budgetSettings.monthlyIncome) * 100 : 0;
 
   return {
     budgetSettings,
@@ -232,12 +382,20 @@ export const useFinanceStore = () => {
     wantWalletBalance,
     wantWalletTransactions,
     bankBalance,
+    goals,
+    achievements,
+    hasSeenTutorial,
     updateBudgetSettings,
     addTransaction,
     deleteTransaction,
     addFixedExpense,
     deleteFixedExpense,
+    addGoal,
+    updateGoal,
+    deleteGoal,
+    contributeToGoal,
     resetMonth,
+    markTutorialComplete,
     setWantWalletBalance,
     setWantWalletTransactions,
     setBankBalance,
@@ -254,6 +412,7 @@ export const useFinanceStore = () => {
     fixedExpensesTotal,
     totalSpent,
     remainingSalary,
-    totalAllocated
+    totalAllocated,
+    savingsRate
   };
 };

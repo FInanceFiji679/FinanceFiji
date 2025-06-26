@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import BudgetHeader from '../Shared/BudgetHeader';
 
@@ -9,6 +9,10 @@ const SettingsTab: React.FC = () => {
     updateBudgetSettings, 
     addFixedExpense, 
     deleteFixedExpense,
+    addGoal,
+    deleteGoal,
+    updateGoal,
+    goals,
     resetMonth 
   } = useFinanceStore();
 
@@ -20,8 +24,49 @@ const SettingsTab: React.FC = () => {
   });
 
   const [newExpense, setNewExpense] = useState({ name: '', amount: '' });
+  const [newGoal, setNewGoal] = useState({ 
+    name: '', 
+    targetAmount: '', 
+    description: '', 
+    category: 'short-term' as const,
+    priority: 'medium' as const,
+    targetDate: ''
+  });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+
+  // Update form data when budget settings change
+  useEffect(() => {
+    setFormData({
+      monthlyIncome: budgetSettings.monthlyIncome.toString(),
+      needsPercentage: budgetSettings.needsPercentage.toString(),
+      wantsPercentage: budgetSettings.wantsPercentage.toString(),
+      responsibilitiesPercentage: budgetSettings.responsibilitiesPercentage.toString()
+    });
+  }, [budgetSettings]);
+
+  // Auto-save when form data changes
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (formData.monthlyIncome !== budgetSettings.monthlyIncome.toString() ||
+          formData.needsPercentage !== budgetSettings.needsPercentage.toString() ||
+          formData.wantsPercentage !== budgetSettings.wantsPercentage.toString() ||
+          formData.responsibilitiesPercentage !== budgetSettings.responsibilitiesPercentage.toString()) {
+        
+        const totalPercentage = parseFloat(formData.needsPercentage) + parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage);
+        if (Math.abs(totalPercentage - 100) < 0.1) {
+          updateBudgetSettings({
+            monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
+            needsPercentage: parseFloat(formData.needsPercentage) || 0,
+            wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
+            responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
+          });
+        }
+      }
+    }, 1000); // Auto-save after 1 second of no changes
+
+    return () => clearTimeout(timeoutId);
+  }, [formData, budgetSettings, updateBudgetSettings]);
 
   const handlePercentageChange = (field: string, value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -49,12 +94,14 @@ const SettingsTab: React.FC = () => {
   };
 
   const handleSaveAll = () => {
-    updateBudgetSettings({
+    const newSettings = {
       monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
       needsPercentage: parseFloat(formData.needsPercentage) || 0,
       wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
       responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
-    });
+    };
+    
+    updateBudgetSettings(newSettings);
     
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);
@@ -70,6 +117,46 @@ const SettingsTab: React.FC = () => {
     }
   };
 
+  const handleAddGoal = () => {
+    if (newGoal.name && newGoal.targetAmount) {
+      addGoal({
+        name: newGoal.name,
+        targetAmount: parseFloat(newGoal.targetAmount),
+        description: newGoal.description,
+        category: newGoal.category,
+        priority: newGoal.priority,
+        targetDate: newGoal.targetDate || undefined,
+        currentAmount: 0
+      });
+      setNewGoal({ 
+        name: '', 
+        targetAmount: '', 
+        description: '', 
+        category: 'short-term',
+        priority: 'medium',
+        targetDate: ''
+      });
+    }
+  };
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return 'bg-red-100 text-red-800 border-red-200';
+      case 'medium': return 'bg-amber-100 text-amber-800 border-amber-200';
+      case 'low': return 'bg-emerald-100 text-emerald-800 border-emerald-200';
+      default: return 'bg-gray-100 text-gray-800 border-gray-200';
+    }
+  };
+
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'short-term': return 'bg-blue-100 text-blue-800';
+      case 'medium-term': return 'bg-purple-100 text-purple-800';
+      case 'long-term': return 'bg-indigo-100 text-indigo-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
   const totalPercentage = parseFloat(formData.needsPercentage) + parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage);
   const isValidPercentage = Math.abs(totalPercentage - 100) < 0.1;
 
@@ -82,6 +169,10 @@ const SettingsTab: React.FC = () => {
       <div className="text-center">
         <h1 className="text-3xl font-bold text-slate-800 mb-2">Budget Settings</h1>
         <p className="text-slate-600">Configure your monthly income and budget allocations</p>
+        <div className="mt-2 flex items-center justify-center space-x-2">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-emerald-600 font-medium">Auto-saving enabled</span>
+        </div>
       </div>
 
       {/* Save All Button */}
@@ -135,6 +226,7 @@ const SettingsTab: React.FC = () => {
               placeholder="0.00"
             />
           </div>
+          <p className="text-xs text-slate-500 mt-1">Changes are automatically saved</p>
         </div>
       </div>
 
@@ -339,6 +431,161 @@ const SettingsTab: React.FC = () => {
             <div className="text-center py-8 text-slate-500">
               <p>No fixed expenses configured yet</p>
               <p className="text-sm">Add recurring monthly expenses above</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Financial Goals Management */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Target className="h-6 w-6 text-emerald-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800">Financial Goals</h2>
+        </div>
+
+        {/* Add New Goal */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 p-6 bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl border border-emerald-200">
+          <div className="space-y-4">
+            <input
+              type="text"
+              value={newGoal.name}
+              onChange={(e) => setNewGoal({ ...newGoal, name: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Goal name (e.g., Emergency Fund)"
+            />
+            <div className="relative">
+              <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+              <input
+                type="number"
+                step="0.01"
+                value={newGoal.targetAmount}
+                onChange={(e) => setNewGoal({ ...newGoal, targetAmount: e.target.value })}
+                className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+                placeholder="Target amount"
+              />
+            </div>
+            <textarea
+              value={newGoal.description}
+              onChange={(e) => setNewGoal({ ...newGoal, description: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 resize-none"
+              placeholder="Goal description (optional)"
+              rows={2}
+            />
+          </div>
+          
+          <div className="space-y-4">
+            <select
+              value={newGoal.category}
+              onChange={(e) => setNewGoal({ ...newGoal, category: e.target.value as any })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              <option value="short-term">Short-term (0-1 year)</option>
+              <option value="medium-term">Medium-term (1-5 years)</option>
+              <option value="long-term">Long-term (5+ years)</option>
+            </select>
+            
+            <select
+              value={newGoal.priority}
+              onChange={(e) => setNewGoal({ ...newGoal, priority: e.target.value as any })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            >
+              <option value="low">Low Priority</option>
+              <option value="medium">Medium Priority</option>
+              <option value="high">High Priority</option>
+            </select>
+            
+            <input
+              type="date"
+              value={newGoal.targetDate}
+              onChange={(e) => setNewGoal({ ...newGoal, targetDate: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+            />
+            
+            <button
+              onClick={handleAddGoal}
+              className="w-full flex items-center justify-center space-x-2 px-4 py-3 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200"
+            >
+              <Plus className="h-5 w-5" />
+              <span>Add Goal</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Goals List */}
+        <div className="space-y-4">
+          {goals.map((goal) => {
+            const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
+            const isCompleted = goal.currentAmount >= goal.targetAmount;
+            
+            return (
+              <div key={goal.id} className={`p-6 rounded-xl border-2 transition-all ${
+                isCompleted 
+                  ? 'bg-gradient-to-r from-emerald-50 to-emerald-100 border-emerald-300' 
+                  : 'bg-slate-50 border-slate-200 hover:border-slate-300'
+              }`}>
+                <div className="flex items-start justify-between mb-4">
+                  <div className="flex-1">
+                    <div className="flex items-center space-x-3 mb-2">
+                      <h4 className="text-lg font-semibold text-slate-800">{goal.name}</h4>
+                      {isCompleted && <Trophy className="h-5 w-5 text-emerald-600" />}
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(goal.priority)}`}>
+                        {goal.priority} priority
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(goal.category)}`}>
+                        {goal.category}
+                      </span>
+                    </div>
+                    {goal.description && (
+                      <p className="text-sm text-slate-600 mb-2">{goal.description}</p>
+                    )}
+                    {goal.targetDate && (
+                      <div className="flex items-center space-x-1 text-sm text-slate-500">
+                        <Calendar className="h-4 w-4" />
+                        <span>Target: {new Date(goal.targetDate).toLocaleDateString()}</span>
+                      </div>
+                    )}
+                  </div>
+                  
+                  <div className="text-right">
+                    <p className="text-xl font-bold text-slate-800">
+                      ${goal.currentAmount.toFixed(2)} / ${goal.targetAmount.toFixed(2)}
+                    </p>
+                    <p className="text-sm text-slate-600">{Math.round(progress)}% complete</p>
+                    <button
+                      onClick={() => deleteGoal(goal.id)}
+                      className="mt-2 p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+                
+                <div className="w-full bg-slate-200 rounded-full h-3 mb-2">
+                  <div
+                    className={`h-3 rounded-full transition-all duration-500 ${
+                      isCompleted ? 'bg-gradient-to-r from-emerald-500 to-emerald-600' : 'bg-gradient-to-r from-blue-500 to-blue-600'
+                    }`}
+                    style={{ width: `${Math.min(progress, 100)}%` }}
+                  />
+                </div>
+                
+                {isCompleted && (
+                  <div className="flex items-center space-x-2 text-emerald-600 font-medium">
+                    <Star className="h-4 w-4" />
+                    <span>Goal Achieved! Congratulations! 🎉</span>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+          
+          {goals.length === 0 && (
+            <div className="text-center py-8 text-slate-500">
+              <Target className="h-16 w-16 mx-auto mb-4 text-slate-300" />
+              <p>No financial goals set yet</p>
+              <p className="text-sm">Add your first goal above to start tracking your progress</p>
             </div>
           )}
         </div>
