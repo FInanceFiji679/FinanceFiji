@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ArrowRight, ArrowLeft, CheckCircle, Target, PiggyBank, Heart, ShoppingBag, Shield, TrendingUp } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, CheckCircle, Target, PiggyBank, Heart, ShoppingBag, Shield, TrendingUp, Building2, DollarSign } from 'lucide-react';
 
 interface TutorialModalProps {
   isOpen: boolean;
@@ -12,18 +12,52 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
 
   const tutorialSteps = [
     {
-      title: "Welcome to FinanceFlow! 🎉",
+      title: "Welcome to Finance Fiji! 🇫🇯",
       content: (
         <div className="text-center space-y-4">
-          <div className="text-6xl mb-4">💰</div>
+          <div className="text-6xl mb-4">🏝️</div>
           <p className="text-lg text-gray-700">
-            Your personal finance management system designed to help you take control of your money and achieve your financial goals.
+            Your comprehensive personal finance management system designed specifically for Fiji. 
+            Take control of your money with precision and cultural relevance.
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
             <p className="text-sm text-blue-700">
-              <strong>Why FinanceFlow?</strong> Traditional budgeting apps are complex and overwhelming. 
-              We use the proven 50/30/20 rule to make budgeting simple, effective, and rewarding.
+              <strong>Why Finance Fiji?</strong> Built with Fiji's financial landscape in mind, 
+              including FNPF calculations, local banking integration, and the proven 50/30/20 budgeting rule.
             </p>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "Smart FNPF Integration 🏛️",
+      content: (
+        <div className="space-y-6">
+          <div className="text-center">
+            <Building2 className="h-16 w-16 mx-auto text-blue-600 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Automatic FNPF Calculations</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-900 mb-2">How it Works:</h4>
+              <ul className="text-sm text-blue-700 space-y-1">
+                <li>• Employee contribution: 8.5% automatically deducted</li>
+                <li>• Employer contribution: 8.5% tracked separately</li>
+                <li>• Personal contributions: Optional additional savings</li>
+                <li>• Real-time net salary calculations</li>
+              </ul>
+            </div>
+            
+            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+              <h4 className="font-semibold text-emerald-900 mb-2">Benefits:</h4>
+              <ul className="text-sm text-emerald-700 space-y-1">
+                <li>• Accurate take-home pay calculations</li>
+                <li>• FNPF contribution tracking and projections</li>
+                <li>• Retirement planning insights</li>
+                <li>• Tax-efficient financial planning</li>
+              </ul>
+            </div>
           </div>
         </div>
       )
@@ -32,14 +66,14 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
       title: "The 50/30/20 Budget Rule",
       content: (
         <div className="space-y-6">
-          <p className="text-gray-700">FinanceFlow is built around the simple but powerful 50/30/20 budgeting rule:</p>
+          <p className="text-gray-700">Finance Fiji uses the proven 50/30/20 budgeting framework, adapted for Fiji's lifestyle:</p>
           
           <div className="grid grid-cols-1 gap-4">
             <div className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
               <Heart className="h-8 w-8 text-emerald-600" />
               <div>
                 <h4 className="font-semibold text-emerald-800">50% - Needs</h4>
-                <p className="text-sm text-emerald-600">Essential expenses like housing, food, utilities, and transportation</p>
+                <p className="text-sm text-emerald-600">Housing, groceries, utilities, transport, FNPF contributions</p>
               </div>
             </div>
             
@@ -47,7 +81,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
               <ShoppingBag className="h-8 w-8 text-amber-600" />
               <div>
                 <h4 className="font-semibold text-amber-800">30% - Wants</h4>
-                <p className="text-sm text-amber-600">Entertainment, dining out, hobbies, and lifestyle choices</p>
+                <p className="text-sm text-amber-600">Dining out, entertainment, kava sessions, shopping</p>
               </div>
             </div>
             
@@ -55,7 +89,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
               <Shield className="h-8 w-8 text-blue-600" />
               <div>
                 <h4 className="font-semibold text-blue-800">20% - Responsibilities</h4>
-                <p className="text-sm text-blue-600">Savings, investments, debt payments, and emergency funds</p>
+                <p className="text-sm text-blue-600">Emergency fund, investments, extra FNPF, family support</p>
               </div>
             </div>
           </div>
@@ -68,31 +102,31 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
         <div className="space-y-6">
           <div className="text-center">
             <PiggyBank className="h-16 w-16 mx-auto text-pink-600 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your Secret Weapon for Saving</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Your Secret Savings Weapon</h3>
           </div>
           
           <div className="space-y-4">
             <div className="bg-pink-50 p-4 rounded-lg border border-pink-200">
-              <h4 className="font-semibold text-pink-800 mb-2">How it Works:</h4>
+              <h4 className="font-semibold text-pink-800 mb-2">Automatic Rewards:</h4>
               <p className="text-sm text-pink-700">
-                Every month, any money you don't spend from your "wants" budget automatically goes into your Want Wallet. 
-                This rewards your discipline and builds savings effortlessly!
+                Every dollar you don't spend from your "wants" budget automatically goes into your Want Wallet. 
+                Skip that expensive lunch? Money saved. Choose home entertainment over cinema? More savings!
               </p>
             </div>
             
             <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-              <h4 className="font-semibold text-emerald-800 mb-2">Real Example:</h4>
+              <h4 className="font-semibold text-emerald-800 mb-2">Real Fiji Example:</h4>
               <p className="text-sm text-emerald-700">
-                If you have $300 for wants but only spend $250, that extra $50 goes straight to your Want Wallet. 
-                Over a year, this could add up to $600 in savings!
+                Monthly wants budget: $400. Spend only $320 on entertainment and dining. 
+                That extra $80 goes straight to your Want Wallet - $960 saved per year!
               </p>
             </div>
             
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">Use it for Goals:</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">Goal Achievement:</h4>
               <p className="text-sm text-blue-700">
-                Set financial goals and watch your Want Wallet help you achieve them faster. 
-                Want a vacation? New laptop? Emergency fund? Your disciplined spending makes it happen!
+                Use your Want Wallet to fund specific goals: vacation to Mamanuca Islands, 
+                new car, house deposit, or emergency fund. Your discipline becomes your dreams!
               </p>
             </div>
           </div>
@@ -100,72 +134,36 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
       )
     },
     {
-      title: "Setting Up Your Budget",
-      content: (
-        <div className="space-y-6">
-          <div className="text-center">
-            <Target className="h-16 w-16 mx-auto text-blue-600 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Let's Get You Started</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">Step 1: Enter Your Monthly Income</h4>
-              <p className="text-sm text-blue-700">
-                Go to Settings and enter your total monthly income. This is your take-home pay after taxes.
-              </p>
-            </div>
-            
-            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
-              <h4 className="font-semibold text-purple-800 mb-2">Step 2: Adjust Your Percentages</h4>
-              <p className="text-sm text-purple-700">
-                The 50/30/20 rule is a starting point. Adjust the percentages based on your lifestyle and goals. 
-                The app will automatically ensure they add up to 100%.
-              </p>
-            </div>
-            
-            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-              <h4 className="font-semibold text-emerald-800 mb-2">Step 3: Add Fixed Expenses</h4>
-              <p className="text-sm text-emerald-700">
-                Add recurring monthly expenses like subscriptions, insurance, or loan payments. 
-                These are automatically deducted from your responsibilities budget.
-              </p>
-            </div>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Tracking Your Spending",
+      title: "Smart Transaction Tracking",
       content: (
         <div className="space-y-6">
           <div className="text-center">
             <TrendingUp className="h-16 w-16 mx-auto text-emerald-600 mb-4" />
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Stay on Track</h3>
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Precision Tracking Made Easy</h3>
           </div>
           
           <div className="space-y-4">
             <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
-              <h4 className="font-semibold text-emerald-800 mb-2">Log Transactions</h4>
+              <h4 className="font-semibold text-emerald-800 mb-2">Automatic Categorization</h4>
               <p className="text-sm text-emerald-700">
-                Use the Needs, Wants, and Responsibilities tabs to log your spending. 
-                Each transaction is automatically categorized and tracked against your budget.
-              </p>
-            </div>
-            
-            <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
-              <h4 className="font-semibold text-amber-800 mb-2">Visual Progress</h4>
-              <p className="text-sm text-amber-700">
-                See your progress with beautiful charts and progress bars. 
-                Know exactly how much you have left in each category at any time.
+                Smart categorization helps you understand where your money goes. 
+                Track groceries, fuel, entertainment, and more with just a few taps.
               </p>
             </div>
             
             <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
-              <h4 className="font-semibold text-blue-800 mb-2">Monthly Reset</h4>
+              <h4 className="font-semibold text-blue-800 mb-2">Multi-Wallet Support</h4>
               <p className="text-sm text-blue-700">
-                At the end of each month, reset your transactions and watch your Want Wallet grow 
-                with any unspent wants money. Your data is archived for future reference.
+                Track money across ANZ, Westpac, BSP, MPAiSA, and cash. 
+                See your complete financial picture in one place.
+              </p>
+            </div>
+            
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-purple-800 mb-2">Real-time Insights</h4>
+              <p className="text-sm text-purple-700">
+                Get instant feedback on your spending patterns, budget progress, 
+                and savings opportunities. Make informed decisions in real-time.
               </p>
             </div>
           </div>
@@ -177,35 +175,37 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
       content: (
         <div className="text-center space-y-6">
           <div className="text-6xl mb-4">🎯</div>
-          <h3 className="text-xl font-semibold text-gray-900">Congratulations!</h3>
+          <h3 className="text-xl font-semibold text-gray-900">Bula! Welcome to Financial Freedom</h3>
           <p className="text-lg text-gray-700">
-            You now understand how FinanceFlow works. Remember:
+            You now understand how Finance Fiji works. Remember:
           </p>
           
           <div className="bg-gradient-to-r from-blue-50 to-emerald-50 p-6 rounded-lg border border-blue-200">
             <div className="space-y-3 text-left">
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Every dollar you don't spend on wants becomes savings</span>
+                <span className="text-sm text-gray-700">Every dollar saved in wants becomes future opportunities</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Small changes in spending habits create big results</span>
+                <span className="text-sm text-gray-700">FNPF contributions are automatically calculated and tracked</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Your financial goals are now achievable and trackable</span>
+                <span className="text-sm text-gray-700">Your financial goals are now achievable and measurable</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">The app automatically saves and tracks everything</span>
+                <span className="text-sm text-gray-700">Smart budgeting leads to financial independence</span>
               </div>
             </div>
           </div>
           
-          <p className="text-gray-600">
-            Start by going to Settings to enter your monthly income, then begin tracking your first transaction!
-          </p>
+          <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
+            <p className="text-amber-800 font-medium">
+              🏝️ Start by setting up your income in the Income tab, then begin tracking your first transaction!
+            </p>
+          </div>
         </div>
       )
     }
@@ -237,10 +237,10 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden">
         {/* Header */}
-        <div className="bg-gradient-to-r from-blue-500 to-emerald-500 text-white p-6">
+        <div className="bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-2xl font-bold">Getting Started</h2>
+              <h2 className="text-2xl font-bold">Finance Fiji Tutorial</h2>
               <p className="text-blue-100">Step {currentStep + 1} of {tutorialSteps.length}</p>
             </div>
             <button
@@ -292,7 +292,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
             
             <button
               onClick={nextStep}
-              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-500 to-emerald-500 text-white rounded-lg hover:from-blue-600 hover:to-emerald-600 transition-all"
+              className="flex items-center space-x-2 px-6 py-2 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600 text-white rounded-lg hover:from-blue-600 hover:via-indigo-600 hover:to-purple-700 transition-all"
             >
               <span>{currentStep === tutorialSteps.length - 1 ? 'Get Started' : 'Next'}</span>
               <ArrowRight className="h-4 w-4" />

@@ -2,6 +2,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Fiji-inspired color palette and design system */
+:root {
+  --fiji-blue: #0066cc;
+  --fiji-turquoise: #00a8cc;
+  --fiji-green: #00cc66;
+  --fiji-coral: #ff6b6b;
+  --fiji-sand: #f4e4bc;
+  --fiji-palm: #2d5016;
+}
+
 /* Portrait optimization */
 @media (orientation: portrait) {
   html {
@@ -15,26 +25,26 @@
   }
 }
 
-/* Custom slider styles */
+/* Custom slider styles with Fiji colors */
 .slider-emerald::-webkit-slider-thumb {
   appearance: none;
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981, #059669);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .slider-emerald::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #10b981;
+  background: linear-gradient(135deg, #10b981, #059669);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
 .slider-amber::-webkit-slider-thumb {
@@ -42,20 +52,20 @@
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .slider-amber::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #f59e0b;
+  background: linear-gradient(135deg, #f59e0b, #d97706);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
 }
 
 .slider-blue::-webkit-slider-thumb {
@@ -63,65 +73,112 @@
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
 .slider-blue::-moz-range-thumb {
   height: 20px;
   width: 20px;
   border-radius: 50%;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
   cursor: pointer;
   border: 2px solid #ffffff;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
 }
 
-/* Smooth transitions */
+/* Enhanced transitions with Fiji-inspired animations */
 * {
   transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
   transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+  transition-duration: 200ms;
 }
 
-/* Custom scrollbar */
+/* Custom scrollbar with Fiji theme */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f5f9;
+  background: linear-gradient(to bottom, #f1f5f9, #e2e8f0);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #cbd5e1;
+  background: linear-gradient(to bottom, #64748b, #475569);
   border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #94a3b8;
+  background: linear-gradient(to bottom, #475569, #334155);
 }
 
-/* Focus styles */
+/* Enhanced focus styles */
 input:focus, select:focus, textarea:focus {
   outline: none;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 0 1px rgba(59, 130, 246, 0.2);
 }
 
-/* Button hover effects */
+/* Button hover effects with micro-animations */
 button {
   transform: translateY(0);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 button:hover {
   transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 button:active {
   transform: translateY(0);
+  transition-duration: 0.1s;
+}
+
+/* Fiji-inspired gradient backgrounds */
+.bg-fiji-ocean {
+  background: linear-gradient(135deg, #0066cc, #00a8cc, #00cc66);
+}
+
+.bg-fiji-sunset {
+  background: linear-gradient(135deg, #ff6b6b, #ffa726, #ffcc02);
+}
+
+.bg-fiji-lagoon {
+  background: linear-gradient(135deg, #00a8cc, #26c6da, #4dd0e1);
+}
+
+/* Loading animations */
+@keyframes fiji-wave {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+.animate-fiji-wave {
+  animation: fiji-wave 2s ease-in-out infinite;
+}
+
+/* Card hover effects */
+.card-hover {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.card-hover:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Progress bar animations */
+.progress-bar {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
 }
 
 /* Portrait-specific optimizations */
@@ -213,5 +270,48 @@ button:active {
   /* iOS Safari specific styles */
   .min-h-screen {
     min-height: -webkit-fill-available;
+  }
+}
+
+/* Accessibility improvements */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .bg-gradient-to-br {
+    background: #ffffff;
+    border: 2px solid #000000;
+  }
+  
+  .text-gray-600 {
+    color: #000000;
+  }
+  
+  .text-gray-500 {
+    color: #000000;
+  }
+}
+
+/* Dark mode preparation */
+@media (prefers-color-scheme: dark) {
+  /* Future dark mode styles can be added here */
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  * {
+    background: transparent !important;
+    color: black !important;
+    box-shadow: none !important;
   }
 }

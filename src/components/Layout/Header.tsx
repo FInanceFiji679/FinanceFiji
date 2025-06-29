@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2, Menu, X, ChevronDown, DollarSign } from 'lucide-react';
+import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2, Menu, X, ChevronDown, DollarSign, BarChart3 } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
@@ -10,6 +10,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: BarChart3, color: 'blue', description: 'Financial overview' },
     { id: 'income', label: 'Income', icon: DollarSign, color: 'green', description: 'Salary & additional income' },
     { id: 'needs', label: 'Needs', icon: Heart, color: 'emerald', description: 'Essential expenses' },
     { id: 'wants', label: 'Wants', icon: ShoppingBag, color: 'amber', description: 'Entertainment & lifestyle' },
@@ -21,7 +22,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const getCurrentPageInfo = () => {
     const currentItem = navItems.find(item => item.id === currentView);
-    return currentItem || { label: 'Dashboard', icon: Wallet };
+    return currentItem || { label: 'Dashboard', icon: BarChart3, color: 'blue' };
   };
 
   const currentPage = getCurrentPageInfo();
@@ -29,10 +30,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const getIconColor = (color: string) => {
     const colorMap = {
+      blue: 'text-blue-600',
       green: 'text-green-600',
       emerald: 'text-emerald-600',
       amber: 'text-amber-600',
-      blue: 'text-blue-600',
       pink: 'text-pink-600',
       indigo: 'text-indigo-600',
       purple: 'text-purple-600'
@@ -42,10 +43,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const getBgColor = (color: string) => {
     const colorMap = {
+      blue: 'bg-blue-50 hover:bg-blue-100',
       green: 'bg-green-50 hover:bg-green-100',
       emerald: 'bg-emerald-50 hover:bg-emerald-100',
       amber: 'bg-amber-50 hover:bg-amber-100',
-      blue: 'bg-blue-50 hover:bg-blue-100',
       pink: 'bg-pink-50 hover:bg-pink-100',
       indigo: 'bg-indigo-50 hover:bg-indigo-100',
       purple: 'bg-purple-50 hover:bg-purple-100'
@@ -75,11 +76,11 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
               </button>
             </div>
 
-            {/* Center - App Name */}
+            {/* Center - App Name with Fiji branding */}
             <div className="flex-1 flex justify-center">
               <div className="flex items-center space-x-2 sm:space-x-3">
                 <div className="relative">
-                  <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg">
+                  <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 p-2 sm:p-3 rounded-lg sm:rounded-xl shadow-lg">
                     <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
                   </div>
                   <div className="absolute -top-0.5 -right-0.5 sm:-top-1 sm:-right-1 bg-emerald-500 rounded-full p-0.5 sm:p-1">
@@ -87,10 +88,10 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
                   </div>
                 </div>
                 <div className="text-center">
-                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-                    FinanceFlow
+                  <h1 className="text-lg sm:text-xl lg:text-2xl font-bold bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                    Finance Fiji
                   </h1>
-                  <p className="text-slate-500 text-xs sm:text-sm hidden sm:block">Smart Budget Tracker</p>
+                  <p className="text-slate-500 text-xs sm:text-sm hidden sm:block">Smart Money Management</p>
                 </div>
               </div>
             </div>
@@ -129,12 +130,12 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
           {/* Sidebar Header */}
           <div className="flex items-center justify-between mb-6 sm:mb-8">
             <div className="flex items-center space-x-3">
-              <div className="bg-gradient-to-br from-blue-500 to-indigo-600 p-2 rounded-lg">
+              <div className="bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 p-2 rounded-lg">
                 <Wallet className="h-5 w-5 sm:h-6 sm:w-6 text-white" />
               </div>
               <div>
-                <h2 className="text-base sm:text-lg font-bold text-gray-900">Navigation</h2>
-                <p className="text-xs sm:text-sm text-gray-500">Choose a section</p>
+                <h2 className="text-base sm:text-lg font-bold text-gray-900">Finance Fiji</h2>
+                <p className="text-xs sm:text-sm text-gray-500">Navigation</p>
               </div>
             </div>
             <button
@@ -195,8 +196,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
                   <Wallet className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600" />
                 </div>
                 <div className="min-w-0">
-                  <h4 className="font-medium text-gray-900 text-sm sm:text-base">FinanceFlow</h4>
-                  <p className="text-xs sm:text-sm text-gray-600">Smart Budget Tracker</p>
+                  <h4 className="font-medium text-gray-900 text-sm sm:text-base">Finance Fiji</h4>
+                  <p className="text-xs sm:text-sm text-gray-600">Designed for Fiji 🇫🇯</p>
                 </div>
               </div>
             </div>
