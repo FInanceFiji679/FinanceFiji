@@ -226,9 +226,12 @@ export const useFinanceStore = () => {
     setWantWalletBalance(prev => prev - amount);
     
     // Add to goal
+    const newAmount = goal.currentAmount + amount;
+    const isCompleted = newAmount >= goal.targetAmount;
+    
     updateGoal(goalId, { 
-      currentAmount: goal.currentAmount + amount,
-      isCompleted: goal.currentAmount + amount >= goal.targetAmount
+      currentAmount: newAmount,
+      isCompleted
     });
 
     // Record transaction
@@ -241,6 +244,17 @@ export const useFinanceStore = () => {
       goalId
     };
     setWantWalletTransactions(prev => [contributionTransaction, ...prev]);
+
+    // Check for goal completion achievement
+    if (isCompleted) {
+      unlockAchievement({
+        id: `goal_completed_${goalId}`,
+        name: 'Goal Achieved! 🎯',
+        description: `Congratulations! You've completed: ${goal.name}`,
+        icon: '🏆',
+        type: 'goal'
+      });
+    }
   };
 
   const unlockAchievement = (achievement: Omit<Achievement, 'unlockedDate'>) => {
@@ -256,7 +270,7 @@ export const useFinanceStore = () => {
 
   const checkForAchievements = () => {
     // First transaction achievement
-    if (transactions.length === 1) {
+    if (transactions.length === 0) { // Will be 1 after the current transaction is added
       unlockAchievement({
         id: 'first_transaction',
         name: 'Getting Started',
@@ -267,6 +281,16 @@ export const useFinanceStore = () => {
     }
 
     // Savings milestones
+    if (wantWalletBalance >= 50 && !achievements.find(a => a.id === 'saver_50')) {
+      unlockAchievement({
+        id: 'saver_50',
+        name: 'First Steps',
+        description: 'You\'ve saved your first $50!',
+        icon: '🌱',
+        type: 'savings'
+      });
+    }
+
     if (wantWalletBalance >= 100 && !achievements.find(a => a.id === 'saver_100')) {
       unlockAchievement({
         id: 'saver_100',
@@ -284,6 +308,37 @@ export const useFinanceStore = () => {
         description: 'Amazing! $500 saved in your Want Wallet!',
         icon: '🏆',
         type: 'savings'
+      });
+    }
+
+    if (wantWalletBalance >= 1000 && !achievements.find(a => a.id === 'saver_1000')) {
+      unlockAchievement({
+        id: 'saver_1000',
+        name: 'Master Saver',
+        description: 'Incredible! You\'ve reached $1,000 in savings!',
+        icon: '👑',
+        type: 'savings'
+      });
+    }
+
+    // Transaction milestones
+    if (transactions.length === 9) { // Will be 10 after current transaction
+      unlockAchievement({
+        id: 'transactions_10',
+        name: 'Tracking Pro',
+        description: 'You\'ve logged 10 transactions!',
+        icon: '📊',
+        type: 'milestone'
+      });
+    }
+
+    if (transactions.length === 49) { // Will be 50 after current transaction
+      unlockAchievement({
+        id: 'transactions_50',
+        name: 'Data Master',
+        description: 'You\'ve logged 50 transactions!',
+        icon: '📈',
+        type: 'milestone'
       });
     }
   };
@@ -305,6 +360,18 @@ export const useFinanceStore = () => {
         fromMonth: new Date().toLocaleString('default', { month: 'long', year: 'numeric' })
       };
       setWantWalletTransactions(prev => [accumulationTransaction, ...prev]);
+
+      // Check for savings achievements
+      const newBalance = wantWalletBalance + unspentWants;
+      if (newBalance >= 100 && wantWalletBalance < 100) {
+        unlockAchievement({
+          id: 'first_month_save',
+          name: 'Month End Saver',
+          description: 'You saved money from your wants budget!',
+          icon: '🎉',
+          type: 'savings'
+        });
+      }
     }
 
     // Calculate and update bank balance
@@ -312,6 +379,27 @@ export const useFinanceStore = () => {
     const fixedExpensesTotal = budgetSettings.fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
     const monthlyRemainder = budgetSettings.monthlyIncome - totalSpent - fixedExpensesTotal;
     setBankBalance(prev => prev + monthlyRemainder);
+
+    // Check for consistency achievements
+    if (monthlyArchive.length === 2) { // Will be 3 after archiving
+      unlockAchievement({
+        id: 'consistency_3',
+        name: 'Building Habits',
+        description: 'You\'ve tracked 3 months consistently!',
+        icon: '🔥',
+        type: 'streak'
+      });
+    }
+
+    if (monthlyArchive.length === 5) { // Will be 6 after archiving
+      unlockAchievement({
+        id: 'consistency_6',
+        name: 'Habit Master',
+        description: 'Six months of consistent tracking!',
+        icon: '⚡',
+        type: 'streak'
+      });
+    }
 
     checkForAchievements();
   };

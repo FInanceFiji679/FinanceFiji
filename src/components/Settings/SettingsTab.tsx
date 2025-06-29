@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle } from 'lucide-react';
+import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle, BookOpen } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import BudgetHeader from '../Shared/BudgetHeader';
+import EducationalSection from '../Educational/EducationalSection';
 
 const SettingsTab: React.FC = () => {
   const { 
@@ -34,6 +35,7 @@ const SettingsTab: React.FC = () => {
   });
   const [showResetConfirm, setShowResetConfirm] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [activeTab, setActiveTab] = useState('budget');
 
   // Update form data when budget settings change
   useEffect(() => {
@@ -160,21 +162,15 @@ const SettingsTab: React.FC = () => {
   const totalPercentage = parseFloat(formData.needsPercentage) + parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage);
   const isValidPercentage = Math.abs(totalPercentage - 100) < 0.1;
 
-  return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      {/* Budget Header */}
-      <BudgetHeader />
+  const tabs = [
+    { id: 'budget', label: 'Budget Settings', icon: DollarSign },
+    { id: 'goals', label: 'Financial Goals', icon: Target },
+    { id: 'education', label: 'Learn & Grow', icon: BookOpen },
+    { id: 'advanced', label: 'Advanced', icon: Calculator }
+  ];
 
-      {/* Header */}
-      <div className="text-center">
-        <h1 className="text-3xl font-bold text-slate-800 mb-2">Budget Settings</h1>
-        <p className="text-slate-600">Configure your monthly income and budget allocations</p>
-        <div className="mt-2 flex items-center justify-center space-x-2">
-          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
-          <span className="text-sm text-emerald-600 font-medium">Auto-saving enabled</span>
-        </div>
-      </div>
-
+  const renderBudgetSettings = () => (
+    <div className="space-y-8">
       {/* Save All Button */}
       <div className="flex justify-center">
         <button
@@ -435,17 +431,20 @@ const SettingsTab: React.FC = () => {
           )}
         </div>
       </div>
+    </div>
+  );
 
-      {/* Financial Goals Management */}
+  const renderGoalsManagement = () => (
+    <div className="space-y-8">
+      {/* Add New Goal */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
         <div className="flex items-center space-x-3 mb-6">
           <div className="p-3 bg-emerald-100 rounded-xl">
             <Target className="h-6 w-6 text-emerald-600" />
           </div>
-          <h2 className="text-xl font-semibold text-slate-800">Financial Goals</h2>
+          <h2 className="text-xl font-semibold text-slate-800">Add Financial Goal</h2>
         </div>
 
-        {/* Add New Goal */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6 p-6 bg-gradient-to-br from-emerald-50 to-blue-50 rounded-xl border border-emerald-200">
           <div className="space-y-4">
             <input
@@ -512,8 +511,11 @@ const SettingsTab: React.FC = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Goals List */}
+      {/* Goals List */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <h3 className="text-xl font-semibold text-slate-800 mb-6">Your Financial Goals</h3>
         <div className="space-y-4">
           {goals.map((goal) => {
             const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
@@ -544,6 +546,7 @@ const SettingsTab: React.FC = () => {
                       <div className="flex items-center space-x-1 text-sm text-slate-500">
                         <Calendar className="h-4 w-4" />
                         <span>Target: {new Date(goal.targetDate).toLocaleDateString()}</span>
+                      
                       </div>
                     )}
                   </div>
@@ -590,14 +593,30 @@ const SettingsTab: React.FC = () => {
           )}
         </div>
       </div>
+    </div>
+  );
 
+  const renderAdvanced = () => (
+    <div className="space-y-8">
       {/* Month Reset */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Monthly Reset</h2>
-        <p className="text-slate-600 mb-6">
-          Reset all transactions and start a new month. Current data will be archived in Reports.
-          Unspent wants money will be added to your Want Wallet.
-        </p>
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-red-100 rounded-xl">
+            <AlertCircle className="h-6 w-6 text-red-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800">Monthly Reset</h2>
+        </div>
+        
+        <div className="bg-amber-50 p-6 rounded-xl border border-amber-200 mb-6">
+          <h4 className="font-medium text-amber-900 mb-2">What happens when you reset?</h4>
+          <ul className="text-sm text-amber-700 space-y-1">
+            <li>• All current month transactions are archived</li>
+            <li>• Unspent wants money is added to your Want Wallet</li>
+            <li>• Monthly remainder is added to your Bank balance</li>
+            <li>• Transaction counters reset to zero</li>
+            <li>• Your budget settings and goals remain unchanged</li>
+          </ul>
+        </div>
         
         {!showResetConfirm ? (
           <button
@@ -627,6 +646,88 @@ const SettingsTab: React.FC = () => {
           </div>
         )}
       </div>
+
+      {/* Data Management */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-blue-100 rounded-xl">
+            <Calculator className="h-6 w-6 text-blue-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800">Data Management</h2>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <h4 className="font-medium text-blue-900 mb-2">Auto-Save</h4>
+            <p className="text-sm text-blue-700 mb-3">
+              All your data is automatically saved to your browser's local storage. 
+              No account required, complete privacy.
+            </p>
+            <div className="flex items-center space-x-2 text-emerald-600">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Active</span>
+            </div>
+          </div>
+          
+          <div className="p-4 bg-purple-50 rounded-lg border border-purple-200">
+            <h4 className="font-medium text-purple-900 mb-2">Data Persistence</h4>
+            <p className="text-sm text-purple-700 mb-3">
+              Your financial data persists between sessions and browser restarts. 
+              Clear browser data to reset everything.
+            </p>
+            <div className="flex items-center space-x-2 text-emerald-600">
+              <CheckCircle className="h-4 w-4" />
+              <span className="text-sm font-medium">Enabled</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-8">
+      {/* Budget Header */}
+      <BudgetHeader />
+
+      {/* Header */}
+      <div className="text-center">
+        <h1 className="text-3xl font-bold text-slate-800 mb-2">Settings & Configuration</h1>
+        <p className="text-slate-600">Customize your financial tracking experience</p>
+        <div className="mt-2 flex items-center justify-center space-x-2">
+          <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+          <span className="text-sm text-emerald-600 font-medium">Auto-saving enabled</span>
+        </div>
+      </div>
+
+      {/* Tab Navigation */}
+      <div className="bg-white rounded-xl border border-gray-200 p-2">
+        <div className="flex space-x-1 overflow-x-auto">
+          {tabs.map((tab) => {
+            const Icon = tab.icon;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-4 py-3 rounded-lg font-medium transition-all whitespace-nowrap ${
+                  activeTab === tab.id
+                    ? 'bg-gradient-to-r from-blue-500 to-emerald-500 text-white shadow-lg'
+                    : 'text-gray-600 hover:bg-gray-50'
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span className="text-sm">{tab.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      {activeTab === 'budget' && renderBudgetSettings()}
+      {activeTab === 'goals' && renderGoalsManagement()}
+      {activeTab === 'education' && <EducationalSection />}
+      {activeTab === 'advanced' && renderAdvanced()}
     </div>
   );
 };
