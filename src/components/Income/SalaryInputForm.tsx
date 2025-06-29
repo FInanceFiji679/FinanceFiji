@@ -300,7 +300,7 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
           {/* Destination Wallet */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              Destination Wallet *
+              Destination Account *
             </label>
             <select
               value={formData.destinationWallet}
@@ -349,7 +349,7 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
               <div className="mt-4 p-3 bg-blue-100 rounded-lg">
                 <p className="text-xs text-blue-700">
                   <strong>Note:</strong> FNPF deductions will be automatically recorded as separate transactions. 
-                  The net amount will be added to your selected wallet.
+                  The net amount will be added to your selected account.
                 </p>
               </div>
             </div>

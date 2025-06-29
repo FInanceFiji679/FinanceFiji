@@ -1,14 +1,16 @@
 import React, { useState } from 'react';
-import { Plus, DollarSign, TrendingUp, Building2, User, Gift, Calendar, Wallet } from 'lucide-react';
+import { Plus, DollarSign, TrendingUp, Building2, User, Gift, Calendar, Wallet, Settings, Edit, Lock, Unlock } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import { useFinanceData } from '../../hooks/useFinanceData';
 import BudgetHeader from '../Shared/BudgetHeader';
 import SalaryInputForm from './SalaryInputForm';
+import IncomeBudgetSettings from './IncomeBudgetSettings';
 
 const IncomeTab: React.FC = () => {
-  const { addTransaction } = useFinanceStore();
+  const { addTransaction, budgetSettings, updateBudgetSettings } = useFinanceStore();
   const { wallets } = useFinanceData();
   const [showSalaryForm, setShowSalaryForm] = useState(false);
+  const [showBudgetSettings, setShowBudgetSettings] = useState(false);
 
   const handleIncomeSubmit = (incomeData: any) => {
     if (incomeData.type === 'salary') {
@@ -16,7 +18,9 @@ const IncomeTab: React.FC = () => {
       addTransaction({
         amount: incomeData.fnpfDeductions.netAmount,
         description: `Salary (Net) - ${incomeData.source}`,
-        category: 'needs' // Income transactions for budget tracking
+        category: 'needs',
+        account: incomeData.destinationWallet,
+        date: incomeData.date
       });
 
       // Add FNPF deductions as responsibility transactions
@@ -24,7 +28,9 @@ const IncomeTab: React.FC = () => {
         addTransaction({
           amount: incomeData.fnpfDeductions.employeeDeduction,
           description: `FNPF Employee Contribution - ${incomeData.source}`,
-          category: 'responsibilities'
+          category: 'responsibilities',
+          account: incomeData.destinationWallet,
+          date: incomeData.date
         });
       }
 
@@ -32,7 +38,9 @@ const IncomeTab: React.FC = () => {
         addTransaction({
           amount: incomeData.fnpfDeductions.personalDeduction,
           description: `FNPF Personal Contribution - ${incomeData.source}`,
-          category: 'responsibilities'
+          category: 'responsibilities',
+          account: incomeData.destinationWallet,
+          date: incomeData.date
         });
       }
     } else {
@@ -40,7 +48,9 @@ const IncomeTab: React.FC = () => {
       addTransaction({
         amount: incomeData.amount,
         description: `${incomeData.name} - ${incomeData.source || incomeData.category}`,
-        category: 'needs' // Other income for budget tracking
+        category: 'needs',
+        account: incomeData.destinationWallet,
+        date: incomeData.date
       });
     }
   };
@@ -58,90 +68,188 @@ const IncomeTab: React.FC = () => {
               <DollarSign className="h-8 w-8" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold">Income Management</h1>
-              <p className="text-green-100">Record your salary and additional income sources</p>
+              <h1 className="text-3xl font-bold">Income & Budget Management</h1>
+              <p className="text-green-100">Record your income and configure budget allocations</p>
             </div>
           </div>
           
-          <button
-            onClick={() => setShowSalaryForm(true)}
-            className="flex items-center space-x-3 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm"
-          >
-            <Plus className="h-6 w-6" />
-            <span className="text-lg font-semibold">Add Income</span>
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={() => setShowBudgetSettings(true)}
+              className="flex items-center space-x-2 px-4 py-2 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm"
+            >
+              {budgetSettings.allocationLocked ? <Lock className="h-5 w-5" /> : <Settings className="h-5 w-5" />}
+              <span className="font-medium">Budget Settings</span>
+            </button>
+            <button
+              onClick={() => setShowSalaryForm(true)}
+              className="flex items-center space-x-3 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm"
+            >
+              <Plus className="h-6 w-6" />
+              <span className="text-lg font-semibold">Add Income</span>
+            </button>
+          </div>
         </div>
 
-        {/* Income Type Cards */}
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white/10 p-6 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <Building2 className="h-8 w-8 text-white" />
-              <h3 className="text-xl font-semibold">Salary Income</h3>
-            </div>
-            <p className="text-green-100 mb-4">
-              Regular employment income with automatic FNPF deductions and tax calculations
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Weekly</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Bi-weekly</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Monthly</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">FNPF Auto-deduct</span>
+        {/* Budget Status */}
+        <div className="mt-6 grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-green-100 text-sm">Monthly Income</span>
+              <span className="text-white font-bold">${budgetSettings.monthlyIncome.toFixed(2)}</span>
             </div>
           </div>
-          
-          <div className="bg-white/10 p-6 rounded-xl backdrop-blur-sm">
-            <div className="flex items-center space-x-3 mb-4">
-              <Gift className="h-8 w-8 text-white" />
-              <h3 className="text-xl font-semibold">Additional Income</h3>
+          <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-green-100 text-sm">Needs ({budgetSettings.needsPercentage}%)</span>
+              <span className="text-white font-bold">${((budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100).toFixed(2)}</span>
             </div>
-            <p className="text-green-100 mb-4">
-              Freelance work, bonuses, gifts, and other income sources without FNPF deductions
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Freelance</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Bonus</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">Gift</span>
-              <span className="text-xs bg-white/20 px-3 py-1 rounded-full">No FNPF</span>
+          </div>
+          <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-green-100 text-sm">Wants ({budgetSettings.wantsPercentage}%)</span>
+              <span className="text-white font-bold">${((budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100).toFixed(2)}</span>
             </div>
+          </div>
+          <div className="bg-white/10 p-4 rounded-lg backdrop-blur-sm">
+            <div className="flex items-center justify-between">
+              <span className="text-green-100 text-sm">Savings ({budgetSettings.responsibilitiesPercentage}%)</span>
+              <span className="text-white font-bold">${((budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100).toFixed(2)}</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Allocation Status */}
+        <div className="mt-4 flex items-center justify-between">
+          <div className="flex items-center space-x-2">
+            {budgetSettings.allocationLocked ? (
+              <>
+                <Lock className="h-4 w-4 text-green-200" />
+                <span className="text-green-200 text-sm">Budget allocations are locked</span>
+              </>
+            ) : (
+              <>
+                <Unlock className="h-4 w-4 text-amber-200" />
+                <span className="text-amber-200 text-sm">Budget allocations can be modified</span>
+              </>
+            )}
+          </div>
+          <div className="text-green-100 text-sm">
+            Total: {(budgetSettings.needsPercentage + budgetSettings.wantsPercentage + budgetSettings.responsibilitiesPercentage).toFixed(1)}%
           </div>
         </div>
       </div>
 
-      {/* Quick Start Guide */}
+      {/* Income Type Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <Building2 className="h-8 w-8 text-blue-600" />
+            <h3 className="text-xl font-semibold text-gray-900">Salary Income</h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Regular employment income with automatic FNPF deductions and tax calculations
+          </p>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Weekly</span>
+            <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Bi-weekly</span>
+            <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">Monthly</span>
+            <span className="text-xs bg-blue-100 text-blue-800 px-3 py-1 rounded-full">FNPF Auto-deduct</span>
+          </div>
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">Features:</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• Automatic FNPF calculations (8.5% employee + 8.5% employer)</li>
+              <li>• Net salary calculation after deductions</li>
+              <li>• Separate tracking of contributions</li>
+              <li>• Integration with budget allocations</li>
+            </ul>
+          </div>
+        </div>
+        
+        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
+          <div className="flex items-center space-x-3 mb-4">
+            <Gift className="h-8 w-8 text-emerald-600" />
+            <h3 className="text-xl font-semibold text-gray-900">Additional Income</h3>
+          </div>
+          <p className="text-gray-600 mb-4">
+            Freelance work, bonuses, gifts, and other income sources without FNPF deductions
+          </p>
+          <div className="flex flex-wrap gap-2 mb-6">
+            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Freelance</span>
+            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Bonus</span>
+            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">Gift</span>
+            <span className="text-xs bg-emerald-100 text-emerald-800 px-3 py-1 rounded-full">No FNPF</span>
+          </div>
+          <div className="bg-emerald-50 p-4 rounded-lg">
+            <h4 className="font-medium text-emerald-900 mb-2">Features:</h4>
+            <ul className="text-sm text-emerald-700 space-y-1">
+              <li>• No automatic deductions</li>
+              <li>• Flexible categorization</li>
+              <li>• One-time or recurring income</li>
+              <li>• Direct budget integration</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      {/* Budget Allocation Guide */}
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
-        <h2 className="text-2xl font-semibold text-gray-900 mb-6">How Income Tracking Works</h2>
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">Budget Allocation Guide</h2>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-200">
-            <div className="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-xl font-bold text-white">1</span>
-            </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Add Your Income</h3>
-            <p className="text-sm text-gray-600">
-              Record your salary or additional income. FNPF deductions are automatically calculated for salary.
-            </p>
-          </div>
-
           <div className="text-center p-6 bg-emerald-50 rounded-xl border border-emerald-200">
-            <div className="w-12 h-12 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-xl font-bold text-white">2</span>
+            <div className="w-16 h-16 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">50%</span>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Automatic Processing</h3>
-            <p className="text-sm text-gray-600">
-              Net income goes to your selected wallet. FNPF contributions are tracked separately.
+            <h3 className="font-semibold text-gray-900 mb-2">Needs</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Essential expenses you can't avoid: rent, groceries, utilities, transportation, minimum debt payments.
             </p>
+            <div className="bg-emerald-100 p-3 rounded-lg">
+              <p className="text-xs text-emerald-700">
+                <strong>Examples:</strong> Housing, food, utilities, transport, insurance, FNPF contributions
+              </p>
+            </div>
           </div>
 
-          <div className="text-center p-6 bg-purple-50 rounded-xl border border-purple-200">
-            <div className="w-12 h-12 bg-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-xl font-bold text-white">3</span>
+          <div className="text-center p-6 bg-amber-50 rounded-xl border border-amber-200">
+            <div className="w-16 h-16 bg-amber-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">30%</span>
             </div>
-            <h3 className="font-semibold text-gray-900 mb-2">Budget Integration</h3>
-            <p className="text-sm text-gray-600">
-              Your income is automatically integrated with your budget tracking and spending categories.
+            <h3 className="font-semibold text-gray-900 mb-2">Wants</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Lifestyle choices: dining out, entertainment, hobbies, subscriptions, shopping for non-essentials.
             </p>
+            <div className="bg-amber-100 p-3 rounded-lg">
+              <p className="text-xs text-amber-700">
+                <strong>Examples:</strong> Dining out, entertainment, kava sessions, shopping, subscriptions
+              </p>
+            </div>
           </div>
+
+          <div className="text-center p-6 bg-blue-50 rounded-xl border border-blue-200">
+            <div className="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl font-bold text-white">20%</span>
+            </div>
+            <h3 className="font-semibold text-gray-900 mb-2">Savings</h3>
+            <p className="text-sm text-gray-600 mb-4">
+              Future you: emergency fund, retirement savings, investments, extra debt payments.
+            </p>
+            <div className="bg-blue-100 p-3 rounded-lg">
+              <p className="text-xs text-blue-700">
+                <strong>Examples:</strong> Emergency fund, investments, extra FNPF, family support
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+          <h4 className="font-medium text-gray-900 mb-2">💡 Pro Tip: Customize Your Allocations</h4>
+          <p className="text-sm text-gray-600">
+            The 50/30/20 rule is a starting point. Adjust percentages based on your lifestyle and goals. 
+            If you have high rent, increase needs to 60% and reduce wants to 20%. The key is finding what works for your situation.
+          </p>
         </div>
       </div>
 
@@ -178,13 +286,13 @@ const IncomeTab: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">Configuration</h3>
             <div className="bg-white p-4 rounded-lg border border-gray-200">
               <p className="text-sm text-gray-600 mb-3">
-                Configure your FNPF deduction percentages in Settings → Financial Config
+                Configure your FNPF deduction percentages in the budget settings above
               </p>
               <button
-                onClick={() => window.location.hash = '#settings'}
+                onClick={() => setShowBudgetSettings(true)}
                 className="text-blue-600 hover:text-blue-700 text-sm font-medium"
               >
-                Go to FNPF Settings →
+                Configure FNPF Settings →
               </button>
             </div>
           </div>
@@ -195,12 +303,12 @@ const IncomeTab: React.FC = () => {
       <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8">
         <div className="flex items-center space-x-3 mb-6">
           <Wallet className="h-6 w-6 text-gray-600" />
-          <h2 className="text-xl font-semibold text-gray-900">Wallet Management</h2>
+          <h2 className="text-xl font-semibold text-gray-900">Account Management</h2>
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Available Wallets</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">Available Accounts</h3>
             <div className="space-y-2">
               {wallets.filter(w => w.isActive).map(wallet => (
                 <div key={wallet.id} className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
@@ -215,9 +323,9 @@ const IncomeTab: React.FC = () => {
           </div>
 
           <div>
-            <h3 className="font-semibold text-gray-900 mb-3">Wallet Selection</h3>
+            <h3 className="font-semibold text-gray-900 mb-3">Account Selection</h3>
             <p className="text-sm text-gray-600 mb-4">
-              When adding income, you'll choose which wallet receives the money. This helps you:
+              When adding income, you'll choose which account receives the money. This helps you:
             </p>
             <ul className="text-sm text-gray-600 space-y-1">
               <li>• Track money across different accounts</li>
@@ -229,11 +337,19 @@ const IncomeTab: React.FC = () => {
         </div>
       </div>
 
-      {/* Salary Input Form Modal */}
+      {/* Modals */}
       {showSalaryForm && (
         <SalaryInputForm
           onClose={() => setShowSalaryForm(false)}
           onSubmit={handleIncomeSubmit}
+        />
+      )}
+
+      {showBudgetSettings && (
+        <IncomeBudgetSettings
+          onClose={() => setShowBudgetSettings(false)}
+          budgetSettings={budgetSettings}
+          updateBudgetSettings={updateBudgetSettings}
         />
       )}
     </div>
