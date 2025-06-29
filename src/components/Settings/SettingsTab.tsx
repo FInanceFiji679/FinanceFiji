@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle, BookOpen } from 'lucide-react';
+import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle, BookOpen, Settings as SettingsIcon } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import BudgetHeader from '../Shared/BudgetHeader';
 import EducationalSection from '../Educational/EducationalSection';
+import FinancialSettingsTab from './FinancialSettingsTab';
 
 const SettingsTab: React.FC = () => {
   const { 
@@ -165,6 +166,7 @@ const SettingsTab: React.FC = () => {
   const tabs = [
     { id: 'budget', label: 'Budget Settings', icon: DollarSign },
     { id: 'goals', label: 'Financial Goals', icon: Target },
+    { id: 'financial', label: 'Financial Config', icon: SettingsIcon },
     { id: 'education', label: 'Learn & Grow', icon: BookOpen },
     { id: 'advanced', label: 'Advanced', icon: Calculator }
   ];
@@ -726,6 +728,7 @@ const SettingsTab: React.FC = () => {
       {/* Tab Content */}
       {activeTab === 'budget' && renderBudgetSettings()}
       {activeTab === 'goals' && renderGoalsManagement()}
+      {activeTab === 'financial' && <FinancialSettingsTab />}
       {activeTab === 'education' && <EducationalSection />}
       {activeTab === 'advanced' && renderAdvanced()}
     </div>
