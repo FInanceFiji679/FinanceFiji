@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
 import IncomeTab from './components/Income/IncomeTab';
+import TransactionManager from './components/Transactions/TransactionManager';
 import NeedsTab from './components/Tracking/NeedsTab';
 import WantsTab from './components/Tracking/WantsTab';
 import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
@@ -37,6 +38,8 @@ function App() {
         return <Dashboard />;
       case 'income':
         return <IncomeTab />;
+      case 'transactions':
+        return <TransactionManager />;
       case 'needs':
         return <NeedsTab />;
       case 'wants':

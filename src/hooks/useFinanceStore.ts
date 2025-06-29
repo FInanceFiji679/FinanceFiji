@@ -5,8 +5,9 @@ export interface Transaction {
   amount: number;
   description: string;
   category: 'needs' | 'wants' | 'responsibilities';
+  account: string;
   date: string;
-  receiptUrl?: string;
+  documentUrl?: string;
 }
 
 export interface FixedExpense {
@@ -34,6 +35,7 @@ export interface BudgetSettings {
   wantsPercentage: number;
   responsibilitiesPercentage: number;
   fixedExpenses: FixedExpense[];
+  allocationLocked?: boolean;
 }
 
 export interface MonthlyData {
@@ -73,7 +75,8 @@ const defaultBudgetSettings: BudgetSettings = {
   needsPercentage: 50,
   wantsPercentage: 30,
   responsibilitiesPercentage: 20,
-  fixedExpenses: []
+  fixedExpenses: [],
+  allocationLocked: false
 };
 
 export const useFinanceStore = () => {
@@ -124,31 +127,34 @@ export const useFinanceStore = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance, goals, achievements, hasSeenTutorial]);
 
-  // CRITICAL: Fix budget settings update to ensure proper saving
+  // CRITICAL: Fix budget settings update to ensure proper saving and validation
   const updateBudgetSettings = (newSettings: Partial<BudgetSettings>) => {
     setBudgetSettings(prev => {
       const updated = { ...prev, ...newSettings };
       
-      // Ensure percentages always total 100%
-      const total = updated.needsPercentage + updated.wantsPercentage + updated.responsibilitiesPercentage;
-      if (Math.abs(total - 100) > 0.1) {
-        console.warn('Budget percentages do not total 100%:', total);
-        // Auto-correct to maintain 100% total
-        const factor = 100 / total;
-        updated.needsPercentage = Math.round(updated.needsPercentage * factor * 10) / 10;
-        updated.wantsPercentage = Math.round(updated.wantsPercentage * factor * 10) / 10;
-        updated.responsibilitiesPercentage = 100 - updated.needsPercentage - updated.wantsPercentage;
+      // Ensure percentages always total 100% when all three are provided
+      if (newSettings.needsPercentage !== undefined && 
+          newSettings.wantsPercentage !== undefined && 
+          newSettings.responsibilitiesPercentage !== undefined) {
+        const total = updated.needsPercentage + updated.wantsPercentage + updated.responsibilitiesPercentage;
+        if (Math.abs(total - 100) > 0.1) {
+          console.warn('Budget percentages do not total 100%:', total);
+          // Auto-correct to maintain 100% total
+          const factor = 100 / total;
+          updated.needsPercentage = Math.round(updated.needsPercentage * factor * 10) / 10;
+          updated.wantsPercentage = Math.round(updated.wantsPercentage * factor * 10) / 10;
+          updated.responsibilitiesPercentage = 100 - updated.needsPercentage - updated.wantsPercentage;
+        }
       }
       
       return updated;
     });
   };
 
-  const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
+  const addTransaction = (transaction: Omit<Transaction, 'id'>) => {
     const newTransaction: Transaction = {
       ...transaction,
-      id: Date.now().toString(),
-      date: new Date().toISOString()
+      id: Date.now().toString()
     };
     setTransactions(prev => [newTransaction, ...prev]);
 

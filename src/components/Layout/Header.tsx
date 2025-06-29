@@ -12,6 +12,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, color: 'blue', description: 'Financial overview' },
     { id: 'income', label: 'Income', icon: DollarSign, color: 'green', description: 'Salary & additional income' },
+    { id: 'transactions', label: 'Transactions', icon: FileText, color: 'slate', description: 'Complete transaction management' },
     { id: 'needs', label: 'Needs', icon: Heart, color: 'emerald', description: 'Essential expenses' },
     { id: 'wants', label: 'Wants', icon: ShoppingBag, color: 'amber', description: 'Entertainment & lifestyle' },
     { id: 'responsibilities', label: 'Responsibilities', icon: Shield, color: 'blue', description: 'Savings & investments' },
@@ -36,7 +37,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
       amber: 'text-amber-600',
       pink: 'text-pink-600',
       indigo: 'text-indigo-600',
-      purple: 'text-purple-600'
+      purple: 'text-purple-600',
+      slate: 'text-slate-600'
     };
     return colorMap[color as keyof typeof colorMap] || 'text-gray-600';
   };
@@ -49,7 +51,8 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
       amber: 'bg-amber-50 hover:bg-amber-100',
       pink: 'bg-pink-50 hover:bg-pink-100',
       indigo: 'bg-indigo-50 hover:bg-indigo-100',
-      purple: 'bg-purple-50 hover:bg-purple-100'
+      purple: 'bg-purple-50 hover:bg-purple-100',
+      slate: 'bg-slate-50 hover:bg-slate-100'
     };
     return colorMap[color as keyof typeof colorMap] || 'bg-gray-50 hover:bg-gray-100';
   };
