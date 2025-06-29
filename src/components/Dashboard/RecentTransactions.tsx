@@ -1,5 +1,5 @@
 import React from 'react';
-import { ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Calendar } from 'lucide-react';
+import { ArrowUpRight, ArrowDownLeft, ArrowRightLeft, Calendar, Building2, Smartphone, Wallet } from 'lucide-react';
 import { Transaction } from '../../hooks/useFinanceStore';
 
 interface RecentTransactionsProps {
@@ -20,6 +20,12 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
     }
   };
 
+  const getAccountIcon = (account: string) => {
+    if (account === 'mpaisa') return <Smartphone className="h-4 w-4 text-indigo-600" />;
+    if (account === 'cash') return <Wallet className="h-4 w-4 text-emerald-600" />;
+    return <Building2 className="h-4 w-4 text-blue-600" />;
+  };
+
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'needs':
@@ -31,6 +37,20 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
       default:
         return 'bg-gray-100 text-gray-800';
     }
+  };
+
+  const getAccountName = (account: string) => {
+    const accountMap: Record<string, string> = {
+      'anz': 'ANZ Bank',
+      'baroda': 'Bank of Baroda',
+      'bsp': 'BSP',
+      'bred': 'Bred Bank',
+      'hfc': 'HFC Bank',
+      'westpac': 'Westpac',
+      'mpaisa': 'MPaisa',
+      'cash': 'Cash'
+    };
+    return accountMap[account] || account;
   };
 
   if (transactions.length === 0) {
@@ -54,6 +74,10 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
             <div>
               <p className="font-medium text-gray-900 text-sm">{transaction.description}</p>
               <div className="flex items-center space-x-2 mt-1">
+                <span className="text-xs text-gray-500 flex items-center space-x-1">
+                  {getAccountIcon(transaction.account)}
+                  <span>{getAccountName(transaction.account)}</span>
+                </span>
                 <span className="text-xs text-gray-500">
                   {new Date(transaction.date).toLocaleDateString('en-FJ')}
                 </span>
@@ -67,6 +91,16 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({ transactions })
             <p className="font-semibold text-sm text-gray-900">
               ${transaction.amount.toFixed(2)}
             </p>
+            {transaction.documentUrl && (
+              <a
+                href={transaction.documentUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-blue-600 hover:text-blue-700"
+              >
+                View Doc
+              </a>
+            )}
           </div>
         </div>
       ))}

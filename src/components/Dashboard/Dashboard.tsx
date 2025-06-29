@@ -1,7 +1,6 @@
 import React from 'react';
 import { Wallet, TrendingUp, PiggyBank, CreditCard, Target, AlertTriangle, Building2, DollarSign } from 'lucide-react';
 import DashboardCard from './DashboardCard';
-import BudgetProgress from './BudgetProgress';
 import RecentTransactions from './RecentTransactions';
 import FNPFSummary from './FNPFSummary';
 import QuickActions from './QuickActions';
@@ -21,21 +20,13 @@ const Dashboard: React.FC = () => {
     wantsSpent,
     responsibilitiesSpent,
     totalSpent,
-    remainingSalary
+    remainingSalary,
+    fixedExpensesTotal
   } = useFinanceStore();
 
-  // Calculate monthly income from transactions
-  const monthlyIncome = transactions
-    .filter(t => {
-      const date = new Date(t.date);
-      const now = new Date();
-      return t.type === 'income' && 
-             date.getMonth() === now.getMonth() && 
-             date.getFullYear() === now.getFullYear();
-    })
-    .reduce((sum, t) => sum + t.amount, 0);
-
-  const monthlyExpenses = totalSpent;
+  // Calculate monthly income from budget settings (not transactions)
+  const monthlyIncome = budgetSettings.monthlyIncome;
+  const monthlyExpenses = totalSpent + fixedExpensesTotal;
   const monthlyNet = monthlyIncome - monthlyExpenses;
 
   const activeGoals = goals.filter(g => !g.isCompleted);
@@ -51,6 +42,7 @@ const Dashboard: React.FC = () => {
   if (needsUtilization > 90) alerts.push({ type: 'warning', message: 'Needs budget almost exhausted' });
   if (wantsUtilization > 100) alerts.push({ type: 'error', message: 'Wants budget exceeded' });
   if (remainingSalary < 0) alerts.push({ type: 'error', message: 'Monthly budget exceeded' });
+  if (monthlyIncome === 0) alerts.push({ type: 'info', message: 'Set up your monthly income in the Income tab' });
 
   return (
     <div className="space-y-8">
@@ -93,7 +85,9 @@ const Dashboard: React.FC = () => {
         <div className="space-y-3">
           {alerts.map((alert, index) => (
             <div key={index} className={`p-4 rounded-xl border ${
-              alert.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-amber-50 border-amber-200 text-amber-800'
+              alert.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 
+              alert.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
+              'bg-blue-50 border-blue-200 text-blue-800'
             }`}>
               <div className="flex items-center space-x-3">
                 <AlertTriangle className="h-5 w-5" />
@@ -111,21 +105,21 @@ const Dashboard: React.FC = () => {
           value={`$${monthlyIncome.toFixed(2)}`}
           icon={TrendingUp}
           color="green"
-          trend={{ value: 5.2, isPositive: true }}
+          trend={{ value: 0, isPositive: true }}
         />
         <DashboardCard
           title="Monthly Expenses"
           value={`$${monthlyExpenses.toFixed(2)}`}
           icon={CreditCard}
           color="red"
-          trend={{ value: -2.1, isPositive: false }}
+          trend={{ value: 0, isPositive: false }}
         />
         <DashboardCard
           title="Want Wallet"
           value={`$${wantWalletBalance.toFixed(2)}`}
           icon={PiggyBank}
           color="purple"
-          trend={{ value: 12.5, isPositive: true }}
+          trend={{ value: 0, isPositive: true }}
         />
         <DashboardCard
           title="Bank Balance"
@@ -200,7 +194,7 @@ const Dashboard: React.FC = () => {
                     <Target className="h-5 w-5 text-blue-600" />
                   </div>
                   <div>
-                    <h4 className="font-semibold text-blue-900">Responsibilities</h4>
+                    <h4 className="font-semibold text-blue-900">Savings</h4>
                     <p className="text-sm text-blue-600">Savings & investments</p>
                   </div>
                 </div>
@@ -217,6 +211,27 @@ const Dashboard: React.FC = () => {
               </div>
               <p className="text-xs text-blue-600 mt-1">{responsibilitiesUtilization.toFixed(1)}% utilized</p>
             </div>
+
+            {/* Fixed Expenses */}
+            {fixedExpensesTotal > 0 && (
+              <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center space-x-3">
+                    <div className="p-2 bg-purple-100 rounded-lg">
+                      <Target className="h-5 w-5 text-purple-600" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-purple-900">Fixed Expenses</h4>
+                      <p className="text-sm text-purple-600">Recurring monthly costs</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-lg font-bold text-purple-700">${fixedExpensesTotal.toFixed(2)}</p>
+                    <p className="text-sm text-purple-600">Auto-deducted</p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -271,6 +286,27 @@ const Dashboard: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Financial Summary */}
+      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
+        <h3 className="text-xl font-semibold text-gray-900 mb-4">Monthly Financial Summary</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center p-4 bg-emerald-50 rounded-lg">
+            <h4 className="font-medium text-emerald-900">Total Income</h4>
+            <p className="text-2xl font-bold text-emerald-600">${monthlyIncome.toFixed(2)}</p>
+          </div>
+          <div className="text-center p-4 bg-red-50 rounded-lg">
+            <h4 className="font-medium text-red-900">Total Expenses</h4>
+            <p className="text-2xl font-bold text-red-600">${monthlyExpenses.toFixed(2)}</p>
+          </div>
+          <div className="text-center p-4 bg-blue-50 rounded-lg">
+            <h4 className="font-medium text-blue-900">Net Position</h4>
+            <p className={`text-2xl font-bold ${monthlyNet >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
+              ${monthlyNet.toFixed(2)}
+            </p>
+          </div>
         </div>
       </div>
     </div>

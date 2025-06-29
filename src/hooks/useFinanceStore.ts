@@ -457,10 +457,15 @@ export const useFinanceStore = () => {
     setHasSeenTutorial(true);
   };
 
-  // CRITICAL: Calculate budget allocations with proper precision
-  const needsBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100 * 100) / 100;
-  const wantsBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100 * 100) / 100;
-  const responsibilitiesBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100 * 100) / 100;
+  // CRITICAL: Calculate budget allocations with proper precision and validation
+  const needsBudget = budgetSettings.monthlyIncome > 0 ? 
+    Math.round((budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100 * 100) / 100 : 0;
+  
+  const wantsBudget = budgetSettings.monthlyIncome > 0 ? 
+    Math.round((budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100 * 100) / 100 : 0;
+  
+  const responsibilitiesBudget = budgetSettings.monthlyIncome > 0 ? 
+    Math.round((budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100 * 100) / 100 : 0;
 
   // CRITICAL: Calculate spent amounts by category with proper filtering
   const needsSpent = transactions
@@ -483,9 +488,9 @@ export const useFinanceStore = () => {
   const wantsRemaining = Math.round((wantsBudget - wantsSpent) * 100) / 100;
   const responsibilitiesRemaining = Math.round((responsibilitiesBudget - responsibilitiesSpent - fixedExpensesTotal) * 100) / 100;
 
-  // Calculate total remaining salary
-  const totalSpent = needsSpent + wantsSpent + responsibilitiesSpent + fixedExpensesTotal;
-  const remainingSalary = Math.round((budgetSettings.monthlyIncome - totalSpent) * 100) / 100;
+  // Calculate total spent and remaining salary
+  const totalSpent = needsSpent + wantsSpent + responsibilitiesSpent;
+  const remainingSalary = Math.round((budgetSettings.monthlyIncome - totalSpent - fixedExpensesTotal) * 100) / 100;
 
   // Calculate total allocated budget
   const totalAllocated = needsBudget + wantsBudget + responsibilitiesBudget;
@@ -517,7 +522,7 @@ export const useFinanceStore = () => {
     setWantWalletBalance,
     setWantWalletTransactions,
     setBankBalance,
-    // CRITICAL: Calculated values with proper precision
+    // CRITICAL: Calculated values with proper precision and validation
     needsBudget,
     wantsBudget,
     responsibilitiesBudget,
