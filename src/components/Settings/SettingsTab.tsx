@@ -173,6 +173,34 @@ const SettingsTab: React.FC = () => {
 
   const renderBudgetSettings = () => (
     <div className="space-y-8">
+      {/* Monthly Income Section */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <DollarSign className="h-6 w-6 text-emerald-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800">Monthly Income Budget</h2>
+        </div>
+        
+        <div className="max-w-md">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Total Monthly Income (for budget planning)
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.monthlyIncome}
+              onChange={(e) => setFormData({ ...formData, monthlyIncome: e.target.value })}
+              className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="0.00"
+            />
+          </div>
+          <p className="text-xs text-slate-500 mt-1">This sets your budget allocations. Add actual income in the Needs tab.</p>
+        </div>
+      </div>
+
       {/* Save All Button */}
       <div className="flex justify-center">
         <button
@@ -198,34 +226,6 @@ const SettingsTab: React.FC = () => {
             </>
           )}
         </button>
-      </div>
-
-      {/* Monthly Income */}
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="p-3 bg-emerald-100 rounded-xl">
-            <DollarSign className="h-6 w-6 text-emerald-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-slate-800">Monthly Income</h2>
-        </div>
-        
-        <div className="max-w-md">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Total Monthly Salary/Income
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.monthlyIncome}
-              onChange={(e) => setFormData({ ...formData, monthlyIncome: e.target.value })}
-              className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-              placeholder="0.00"
-            />
-          </div>
-          <p className="text-xs text-slate-500 mt-1">Changes are automatically saved</p>
-        </div>
       </div>
 
       {/* Budget Allocation */}
@@ -548,7 +548,6 @@ const SettingsTab: React.FC = () => {
                       <div className="flex items-center space-x-1 text-sm text-slate-500">
                         <Calendar className="h-4 w-4" />
                         <span>Target: {new Date(goal.targetDate).toLocaleDateString()}</span>
-                      
                       </div>
                     )}
                   </div>

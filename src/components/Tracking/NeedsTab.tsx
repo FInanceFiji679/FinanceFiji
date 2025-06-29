@@ -22,15 +22,15 @@ const NeedsTab: React.FC = () => {
   const progressPercentage = needsBudget > 0 ? (needsSpent / needsBudget) * 100 : 0;
 
   const handleSalarySubmit = (salaryData: any) => {
-    // Add the main income transaction
-    addTransaction({
-      amount: salaryData.fnpfDeductions ? salaryData.fnpfDeductions.netAmount : salaryData.amount,
-      description: `${salaryData.type === 'salary' ? 'Salary' : 'Additional Income'} - ${salaryData.source}`,
-      category: 'needs' // Income goes to needs category for budget tracking
-    });
+    if (salaryData.type === 'salary') {
+      // Add the net salary as income
+      addTransaction({
+        amount: salaryData.fnpfDeductions.netAmount,
+        description: `Salary (Net) - ${salaryData.source}`,
+        category: 'needs' // Income transactions for budget tracking
+      });
 
-    // If it's salary with FNPF deductions, add FNPF transactions
-    if (salaryData.fnpfDeductions && salaryData.type === 'salary') {
+      // Add FNPF deductions as responsibility transactions
       if (salaryData.fnpfDeductions.employeeDeduction > 0) {
         addTransaction({
           amount: salaryData.fnpfDeductions.employeeDeduction,
@@ -46,6 +46,13 @@ const NeedsTab: React.FC = () => {
           category: 'responsibilities'
         });
       }
+    } else {
+      // Add other income
+      addTransaction({
+        amount: salaryData.amount,
+        description: `${salaryData.name} - ${salaryData.source || salaryData.category}`,
+        category: 'needs' // Other income for budget tracking
+      });
     }
   };
 
@@ -63,7 +70,7 @@ const NeedsTab: React.FC = () => {
             </div>
             <div>
               <h2 className="text-xl font-bold">Income Entry</h2>
-              <p className="text-emerald-100">Record your salary and additional income</p>
+              <p className="text-emerald-100">Record your salary and additional income first</p>
             </div>
           </div>
           
@@ -74,6 +81,28 @@ const NeedsTab: React.FC = () => {
             <Plus className="h-5 w-5" />
             <span className="font-medium">Add Income</span>
           </button>
+        </div>
+
+        <div className="mt-4 grid grid-cols-2 gap-4">
+          <div className="bg-white/10 p-4 rounded-lg">
+            <h3 className="font-medium mb-2">Salary</h3>
+            <p className="text-sm text-emerald-100">Regular employment income with automatic FNPF deductions</p>
+            <div className="mt-2 flex items-center space-x-2">
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Weekly</span>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Bi-weekly</span>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Monthly</span>
+            </div>
+          </div>
+          
+          <div className="bg-white/10 p-4 rounded-lg">
+            <h3 className="font-medium mb-2">Other Income</h3>
+            <p className="text-sm text-emerald-100">Freelance work, bonuses, gifts, and additional income sources</p>
+            <div className="mt-2 flex items-center space-x-2">
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Freelance</span>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Bonus</span>
+              <span className="text-xs bg-white/20 px-2 py-1 rounded">Gift</span>
+            </div>
+          </div>
         </div>
       </div>
 

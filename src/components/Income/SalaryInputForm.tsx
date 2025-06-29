@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, DollarSign, Calendar, Building2, Plus } from 'lucide-react';
+import { X, DollarSign, Calendar, Building2, Plus, User, Gift } from 'lucide-react';
 import { useFinanceData } from '../../hooks/useFinanceData';
 
 interface SalaryInputFormProps {
@@ -10,13 +10,16 @@ interface SalaryInputFormProps {
 const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) => {
   const { wallets } = useFinanceData();
   const [formData, setFormData] = useState({
-    type: 'salary' as 'salary' | 'additional',
+    type: 'salary' as 'salary' | 'other',
     amount: '',
     frequency: 'monthly' as 'weekly' | 'bi-weekly' | 'monthly',
     date: new Date().toISOString().split('T')[0],
     source: '',
     destinationWallet: wallets[0]?.id || '',
-    description: ''
+    description: '',
+    // Additional income fields
+    name: '',
+    category: 'freelance' as 'freelance' | 'bonus' | 'gift' | 'other'
   });
 
   // Load FNPF configuration
@@ -58,6 +61,24 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
     onClose();
   };
 
+  const getIncomeTypeIcon = (type: string) => {
+    switch (type) {
+      case 'salary': return Building2;
+      case 'other': return Plus;
+      default: return DollarSign;
+    }
+  };
+
+  const getCategoryIcon = (category: string) => {
+    switch (category) {
+      case 'freelance': return User;
+      case 'bonus': return DollarSign;
+      case 'gift': return Gift;
+      case 'other': return Plus;
+      default: return DollarSign;
+    }
+  };
+
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
@@ -84,7 +105,7 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
 
         {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {/* Income Type */}
+          {/* Income Type Selection */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
               Income Type
@@ -101,92 +122,180 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
               >
                 <Building2 className="h-6 w-6 mx-auto mb-2" />
                 <div className="font-medium">Salary</div>
-                <div className="text-xs text-gray-500">Regular employment income</div>
+                <div className="text-xs text-gray-500">Regular employment income with FNPF</div>
               </button>
               
               <button
                 type="button"
-                onClick={() => setFormData({ ...formData, type: 'additional' })}
+                onClick={() => setFormData({ ...formData, type: 'other' })}
                 className={`p-4 rounded-xl border-2 transition-all ${
-                  formData.type === 'additional'
+                  formData.type === 'other'
                     ? 'border-blue-500 bg-blue-50 text-blue-700'
                     : 'border-gray-200 hover:border-gray-300'
                 }`}
               >
                 <Plus className="h-6 w-6 mx-auto mb-2" />
-                <div className="font-medium">Additional Income</div>
-                <div className="text-xs text-gray-500">Freelance, bonus, etc.</div>
+                <div className="font-medium">Other Income</div>
+                <div className="text-xs text-gray-500">Freelance, bonus, gifts, etc.</div>
               </button>
             </div>
           </div>
 
-          {/* Amount and Frequency */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {formData.type === 'salary' ? 'Gross Salary Amount (FJD)' : 'Amount (FJD)'} *
-              </label>
-              <div className="relative">
-                <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+          {/* Salary Section */}
+          {formData.type === 'salary' && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Salary Details</h3>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Gross Salary Amount (FJD) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Frequency
+                  </label>
+                  <select
+                    value={formData.frequency}
+                    onChange={(e) => setFormData({ ...formData, frequency: e.target.value as any })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  >
+                    <option value="weekly">Weekly</option>
+                    <option value="bi-weekly">Bi-weekly</option>
+                    <option value="monthly">Monthly</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Payment Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Employer/Source *
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.source}
+                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    placeholder="e.g., ABC Company Ltd"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Other Income Section */}
+          {formData.type === 'other' && (
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-900 border-b pb-2">Additional Income Details</h3>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Income Name *
+                </label>
                 <input
-                  type="number"
-                  step="0.01"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                  placeholder="0.00"
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  placeholder="e.g., Freelance Project, Birthday Gift"
                   required
                 />
               </div>
-            </div>
 
-            {formData.type === 'salary' && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Payment Frequency
-                </label>
-                <select
-                  value={formData.frequency}
-                  onChange={(e) => setFormData({ ...formData, frequency: e.target.value as any })}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                >
-                  <option value="weekly">Weekly</option>
-                  <option value="bi-weekly">Bi-weekly</option>
-                  <option value="monthly">Monthly</option>
-                </select>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Amount (FJD) *
+                  </label>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={formData.amount}
+                      onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                      className="w-full pl-8 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                      placeholder="0.00"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Category
+                  </label>
+                  <select
+                    value={formData.category}
+                    onChange={(e) => setFormData({ ...formData, category: e.target.value as any })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                  >
+                    <option value="freelance">Freelance Work</option>
+                    <option value="bonus">Bonus/Commission</option>
+                    <option value="gift">Gift/Inheritance</option>
+                    <option value="other">Other</option>
+                  </select>
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* Date and Source */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Date *
-              </label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                required
-              />
-            </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Date *
+                  </label>
+                  <input
+                    type="date"
+                    value={formData.date}
+                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    required
+                  />
+                </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                {formData.type === 'salary' ? 'Employer/Source' : 'Income Source'} *
-              </label>
-              <input
-                type="text"
-                value={formData.source}
-                onChange={(e) => setFormData({ ...formData, source: e.target.value })}
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-                placeholder={formData.type === 'salary' ? 'e.g., ABC Company Ltd' : 'e.g., Freelance Project'}
-                required
-              />
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Source
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.source}
+                    onChange={(e) => setFormData({ ...formData, source: e.target.value })}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                    placeholder="e.g., Client Name, Company"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Destination Wallet */}
           <div>
@@ -200,23 +309,9 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
               required
             >
               {wallets.filter(w => w.isActive).map(wallet => (
-                <option key={wallet.id} value={wallet.id}>{wallet.name}</option>
+                <option key={wallet.id} value={wallet.id}>{wallet.name} ({wallet.type})</option>
               ))}
             </select>
-          </div>
-
-          {/* Description */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Description (Optional)
-            </label>
-            <input
-              type="text"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-              placeholder="Additional notes about this income..."
-            />
           </div>
 
           {/* FNPF Calculation Preview (for salary only) */}
@@ -271,9 +366,13 @@ const SalaryInputForm: React.FC<SalaryInputFormProps> = ({ onClose, onSubmit }) 
             </button>
             <button
               type="submit"
-              className="flex-1 px-6 py-3 bg-gradient-to-r from-emerald-500 to-blue-500 text-white rounded-xl hover:from-emerald-600 hover:to-blue-600 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+              className={`flex-1 px-6 py-3 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-200 ${
+                formData.type === 'salary' 
+                  ? 'bg-gradient-to-r from-emerald-500 to-blue-500 hover:from-emerald-600 hover:to-blue-600'
+                  : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600'
+              }`}
             >
-              Add Income
+              Add {formData.type === 'salary' ? 'Salary' : 'Income'}
             </button>
           </div>
         </form>
