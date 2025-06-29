@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { X, DollarSign, FileText, Receipt } from 'lucide-react';
+import { X, DollarSign, FileText, Receipt, Wallet } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
+import { useFinanceData } from '../../hooks/useFinanceData';
 
 interface TransactionFormProps {
   category: 'needs' | 'wants' | 'responsibilities';
@@ -9,10 +10,13 @@ interface TransactionFormProps {
 
 const TransactionForm: React.FC<TransactionFormProps> = ({ category, onClose }) => {
   const { addTransaction } = useFinanceStore();
+  const { wallets } = useFinanceData();
+  
   const [formData, setFormData] = useState({
     amount: '',
     description: '',
-    receiptUrl: ''
+    receiptUrl: '',
+    walletId: wallets.find(w => w.isActive)?.id || ''
   });
 
   const getCategoryInfo = () => {
@@ -119,6 +123,31 @@ const TransactionForm: React.FC<TransactionFormProps> = ({ category, onClose }) 
                 placeholder="What did you spend on?"
                 required
               />
+            </div>
+          </div>
+
+          {/* Wallet Selection */}
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-2">
+              Wallet
+            </label>
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Wallet className="h-5 w-5 text-slate-400" />
+              </div>
+              <select
+                value={formData.walletId}
+                onChange={(e) => setFormData({ ...formData, walletId: e.target.value })}
+                className="w-full pl-10 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors appearance-none"
+                required
+              >
+                <option value="">Select wallet</option>
+                {wallets.filter(w => w.isActive).map(wallet => (
+                  <option key={wallet.id} value={wallet.id}>
+                    {wallet.name} ({wallet.type})
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 

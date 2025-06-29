@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus, Receipt, Trash2, Heart, TrendingDown } from 'lucide-react';
+import { Plus, Receipt, Trash2, Heart, TrendingDown, DollarSign } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import BudgetHeader from '../Shared/BudgetHeader';
 import TransactionForm from './TransactionForm';
+import SalaryInputForm from '../Income/SalaryInputForm';
 
 const NeedsTab: React.FC = () => {
   const { 
@@ -10,18 +11,71 @@ const NeedsTab: React.FC = () => {
     needsSpent, 
     needsRemaining, 
     transactions,
-    deleteTransaction 
+    deleteTransaction,
+    addTransaction 
   } = useFinanceStore();
 
   const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [showSalaryForm, setShowSalaryForm] = useState(false);
 
   const needsTransactions = transactions.filter(t => t.category === 'needs');
   const progressPercentage = needsBudget > 0 ? (needsSpent / needsBudget) * 100 : 0;
+
+  const handleSalarySubmit = (salaryData: any) => {
+    // Add the main income transaction
+    addTransaction({
+      amount: salaryData.fnpfDeductions ? salaryData.fnpfDeductions.netAmount : salaryData.amount,
+      description: `${salaryData.type === 'salary' ? 'Salary' : 'Additional Income'} - ${salaryData.source}`,
+      category: 'needs' // Income goes to needs category for budget tracking
+    });
+
+    // If it's salary with FNPF deductions, add FNPF transactions
+    if (salaryData.fnpfDeductions && salaryData.type === 'salary') {
+      if (salaryData.fnpfDeductions.employeeDeduction > 0) {
+        addTransaction({
+          amount: salaryData.fnpfDeductions.employeeDeduction,
+          description: `FNPF Employee Contribution - ${salaryData.source}`,
+          category: 'responsibilities'
+        });
+      }
+
+      if (salaryData.fnpfDeductions.personalDeduction > 0) {
+        addTransaction({
+          amount: salaryData.fnpfDeductions.personalDeduction,
+          description: `FNPF Personal Contribution - ${salaryData.source}`,
+          category: 'responsibilities'
+        });
+      }
+    }
+  };
 
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Budget Header */}
       <BudgetHeader />
+
+      {/* Salary Input Section */}
+      <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-xl text-white p-6">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-white/20 rounded-xl">
+              <DollarSign className="h-6 w-6" />
+            </div>
+            <div>
+              <h2 className="text-xl font-bold">Income Entry</h2>
+              <p className="text-emerald-100">Record your salary and additional income</p>
+            </div>
+          </div>
+          
+          <button
+            onClick={() => setShowSalaryForm(true)}
+            className="flex items-center space-x-2 px-6 py-3 bg-white/20 hover:bg-white/30 rounded-xl transition-all duration-200 backdrop-blur-sm"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="font-medium">Add Income</span>
+          </button>
+        </div>
+      </div>
 
       {/* Header with Budget Info */}
       <div className="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-2xl shadow-xl text-white p-8">
@@ -75,7 +129,7 @@ const NeedsTab: React.FC = () => {
           className="flex items-center space-x-3 px-8 py-4 bg-gradient-to-r from-emerald-500 to-emerald-600 text-white rounded-2xl hover:from-emerald-600 hover:to-emerald-700 transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
           <Plus className="h-6 w-6" />
-          <span className="text-lg font-semibold">Add Transaction</span>
+          <span className="text-lg font-semibold">Add Expense</span>
         </button>
       </div>
 
@@ -140,7 +194,7 @@ const NeedsTab: React.FC = () => {
             <div className="p-12 text-center text-slate-500">
               <Heart className="h-16 w-16 mx-auto mb-4 text-slate-300" />
               <h3 className="text-lg font-medium mb-2">No transactions yet</h3>
-              <p>Start tracking your essential expenses</p>
+              <p>Start by adding your salary, then track your essential expenses</p>
             </div>
           )}
         </div>
@@ -151,6 +205,14 @@ const NeedsTab: React.FC = () => {
         <TransactionForm
           category="needs"
           onClose={() => setShowTransactionForm(false)}
+        />
+      )}
+
+      {/* Salary Input Form Modal */}
+      {showSalaryForm && (
+        <SalaryInputForm
+          onClose={() => setShowSalaryForm(false)}
+          onSubmit={handleSalarySubmit}
         />
       )}
     </div>
