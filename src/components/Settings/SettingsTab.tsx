@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Save, Plus, Trash2, DollarSign, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle, BookOpen, Settings as SettingsIcon } from 'lucide-react';
+import { Save, Plus, Trash2, Percent, Calculator, CheckCircle, Target, Trophy, Star, Calendar, Flag, AlertCircle, BookOpen, Settings as SettingsIcon } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 import BudgetHeader from '../Shared/BudgetHeader';
 import EducationalSection from '../Educational/EducationalSection';
@@ -19,7 +19,6 @@ const SettingsTab: React.FC = () => {
   } = useFinanceStore();
 
   const [formData, setFormData] = useState({
-    monthlyIncome: budgetSettings.monthlyIncome.toString(),
     needsPercentage: budgetSettings.needsPercentage.toString(),
     wantsPercentage: budgetSettings.wantsPercentage.toString(),
     responsibilitiesPercentage: budgetSettings.responsibilitiesPercentage.toString()
@@ -41,7 +40,6 @@ const SettingsTab: React.FC = () => {
   // Update form data when budget settings change
   useEffect(() => {
     setFormData({
-      monthlyIncome: budgetSettings.monthlyIncome.toString(),
       needsPercentage: budgetSettings.needsPercentage.toString(),
       wantsPercentage: budgetSettings.wantsPercentage.toString(),
       responsibilitiesPercentage: budgetSettings.responsibilitiesPercentage.toString()
@@ -51,15 +49,13 @@ const SettingsTab: React.FC = () => {
   // Auto-save when form data changes
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (formData.monthlyIncome !== budgetSettings.monthlyIncome.toString() ||
-          formData.needsPercentage !== budgetSettings.needsPercentage.toString() ||
+      if (formData.needsPercentage !== budgetSettings.needsPercentage.toString() ||
           formData.wantsPercentage !== budgetSettings.wantsPercentage.toString() ||
           formData.responsibilitiesPercentage !== budgetSettings.responsibilitiesPercentage.toString()) {
         
         const totalPercentage = parseFloat(formData.needsPercentage) + parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage);
         if (Math.abs(totalPercentage - 100) < 0.1) {
           updateBudgetSettings({
-            monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
             needsPercentage: parseFloat(formData.needsPercentage) || 0,
             wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
             responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
@@ -98,7 +94,6 @@ const SettingsTab: React.FC = () => {
 
   const handleSaveAll = () => {
     const newSettings = {
-      monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
       needsPercentage: parseFloat(formData.needsPercentage) || 0,
       wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
       responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
@@ -164,7 +159,7 @@ const SettingsTab: React.FC = () => {
   const isValidPercentage = Math.abs(totalPercentage - 100) < 0.1;
 
   const tabs = [
-    { id: 'budget', label: 'Budget Settings', icon: DollarSign },
+    { id: 'budget', label: 'Budget Settings', icon: Percent },
     { id: 'goals', label: 'Financial Goals', icon: Target },
     { id: 'financial', label: 'Financial Config', icon: SettingsIcon },
     { id: 'education', label: 'Learn & Grow', icon: BookOpen },
@@ -173,61 +168,6 @@ const SettingsTab: React.FC = () => {
 
   const renderBudgetSettings = () => (
     <div className="space-y-8">
-      {/* Monthly Income Section */}
-      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="p-3 bg-emerald-100 rounded-xl">
-            <DollarSign className="h-6 w-6 text-emerald-600" />
-          </div>
-          <h2 className="text-xl font-semibold text-slate-800">Monthly Income Budget</h2>
-        </div>
-        
-        <div className="max-w-md">
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            Total Monthly Income (for budget planning)
-          </label>
-          <div className="relative">
-            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
-            <input
-              type="number"
-              step="0.01"
-              value={formData.monthlyIncome}
-              onChange={(e) => setFormData({ ...formData, monthlyIncome: e.target.value })}
-              className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
-              placeholder="0.00"
-            />
-          </div>
-          <p className="text-xs text-slate-500 mt-1">This sets your budget allocations. Add actual income in the Needs tab.</p>
-        </div>
-      </div>
-
-      {/* Save All Button */}
-      <div className="flex justify-center">
-        <button
-          onClick={handleSaveAll}
-          disabled={!isValidPercentage}
-          className={`flex items-center space-x-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${
-            saveSuccess 
-              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white'
-              : isValidPercentage
-                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
-                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-          }`}
-        >
-          {saveSuccess ? (
-            <>
-              <CheckCircle className="h-6 w-6" />
-              <span>Settings Saved!</span>
-            </>
-          ) : (
-            <>
-              <Save className="h-6 w-6" />
-              <span>Save All Settings</span>
-            </>
-          )}
-        </button>
-      </div>
-
       {/* Budget Allocation */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
         <div className="flex items-center space-x-3 mb-6">
@@ -257,9 +197,6 @@ const SettingsTab: React.FC = () => {
                   />
                   <span className="text-emerald-700 font-medium">%</span>
                 </div>
-                <p className="text-sm text-emerald-600 mt-1">
-                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.needsPercentage) || 0) / 100).toFixed(2)}
-                </p>
               </div>
             </div>
             <input
@@ -291,9 +228,6 @@ const SettingsTab: React.FC = () => {
                   />
                   <span className="text-amber-700 font-medium">%</span>
                 </div>
-                <p className="text-sm text-amber-600 mt-1">
-                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.wantsPercentage) || 0) / 100).toFixed(2)}
-                </p>
               </div>
             </div>
             <input
@@ -325,9 +259,6 @@ const SettingsTab: React.FC = () => {
                   />
                   <span className="text-blue-700 font-medium">%</span>
                 </div>
-                <p className="text-sm text-blue-600 mt-1">
-                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.responsibilitiesPercentage) || 0) / 100).toFixed(2)}
-                </p>
               </div>
             </div>
             <input
@@ -699,6 +630,33 @@ const SettingsTab: React.FC = () => {
           <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
           <span className="text-sm text-emerald-600 font-medium">Auto-saving enabled</span>
         </div>
+      </div>
+
+      {/* Save All Button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleSaveAll}
+          disabled={!isValidPercentage}
+          className={`flex items-center space-x-3 px-8 py-4 rounded-2xl font-semibold text-lg transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${
+            saveSuccess 
+              ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 text-white'
+              : isValidPercentage
+                ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+          }`}
+        >
+          {saveSuccess ? (
+            <>
+              <CheckCircle className="h-6 w-6" />
+              <span>Settings Saved!</span>
+            </>
+          ) : (
+            <>
+              <Save className="h-6 w-6" />
+              <span>Save All Settings</span>
+            </>
+          )}
+        </button>
       </div>
 
       {/* Tab Navigation */}

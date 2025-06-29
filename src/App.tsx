@@ -7,11 +7,12 @@ import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
 import WantWalletTab from './components/Tracking/WantWalletTab';
 import BankTab from './components/Tracking/BankTab';
 import ReportsTab from './components/Reports/ReportsTab';
+import IncomeTab from './components/Income/IncomeTab';
 import TutorialModal from './components/Tutorial/TutorialModal';
 import { useFinanceStore } from './hooks/useFinanceStore';
 
 function App() {
-  const [currentView, setCurrentView] = useState('needs');
+  const [currentView, setCurrentView] = useState('income');
   const { hasSeenTutorial, markTutorialComplete } = useFinanceStore();
   const [showTutorial, setShowTutorial] = useState(false);
 
@@ -23,6 +24,8 @@ function App() {
 
   const renderCurrentView = () => {
     switch (currentView) {
+      case 'income':
+        return <IncomeTab />;
       case 'needs':
         return <NeedsTab />;
       case 'wants':
@@ -38,7 +41,7 @@ function App() {
       case 'reports':
         return <ReportsTab />;
       default:
-        return <NeedsTab />;
+        return <IncomeTab />;
     }
   };
 

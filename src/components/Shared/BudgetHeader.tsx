@@ -11,11 +11,12 @@ const BudgetHeader: React.FC = () => {
         <div className="text-center">
           <div className="flex items-center justify-center mb-2">
             <DollarSign className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 mr-1 sm:mr-2" />
-            <span className="text-xs sm:text-sm font-medium text-gray-600">Monthly Salary</span>
+            <span className="text-xs sm:text-sm font-medium text-gray-600">Budget Planning</span>
           </div>
           <p className="text-lg sm:text-2xl font-bold text-gray-900">
             ${budgetSettings.monthlyIncome.toFixed(2)}
           </p>
+          <p className="text-xs text-gray-500">Set in Settings</p>
         </div>
 
         <div className="text-center">

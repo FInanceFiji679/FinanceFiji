@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2, Menu, X, ChevronDown } from 'lucide-react';
+import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2, Menu, X, ChevronDown, DollarSign } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
@@ -10,6 +10,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const navItems = [
+    { id: 'income', label: 'Income', icon: DollarSign, color: 'green', description: 'Salary & additional income' },
     { id: 'needs', label: 'Needs', icon: Heart, color: 'emerald', description: 'Essential expenses' },
     { id: 'wants', label: 'Wants', icon: ShoppingBag, color: 'amber', description: 'Entertainment & lifestyle' },
     { id: 'responsibilities', label: 'Responsibilities', icon: Shield, color: 'blue', description: 'Savings & investments' },
@@ -28,6 +29,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const getIconColor = (color: string) => {
     const colorMap = {
+      green: 'text-green-600',
       emerald: 'text-emerald-600',
       amber: 'text-amber-600',
       blue: 'text-blue-600',
@@ -40,6 +42,7 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const getBgColor = (color: string) => {
     const colorMap = {
+      green: 'bg-green-50 hover:bg-green-100',
       emerald: 'bg-emerald-50 hover:bg-emerald-100',
       amber: 'bg-amber-50 hover:bg-amber-100',
       blue: 'bg-blue-50 hover:bg-blue-100',
