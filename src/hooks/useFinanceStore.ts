@@ -124,8 +124,24 @@ export const useFinanceStore = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance, goals, achievements, hasSeenTutorial]);
 
+  // CRITICAL: Fix budget settings update to ensure proper saving
   const updateBudgetSettings = (newSettings: Partial<BudgetSettings>) => {
-    setBudgetSettings(prev => ({ ...prev, ...newSettings }));
+    setBudgetSettings(prev => {
+      const updated = { ...prev, ...newSettings };
+      
+      // Ensure percentages always total 100%
+      const total = updated.needsPercentage + updated.wantsPercentage + updated.responsibilitiesPercentage;
+      if (Math.abs(total - 100) > 0.1) {
+        console.warn('Budget percentages do not total 100%:', total);
+        // Auto-correct to maintain 100% total
+        const factor = 100 / total;
+        updated.needsPercentage = Math.round(updated.needsPercentage * factor * 10) / 10;
+        updated.wantsPercentage = Math.round(updated.wantsPercentage * factor * 10) / 10;
+        updated.responsibilitiesPercentage = 100 - updated.needsPercentage - updated.wantsPercentage;
+      }
+      
+      return updated;
+    });
   };
 
   const addTransaction = (transaction: Omit<Transaction, 'id' | 'date'>) => {
@@ -435,27 +451,35 @@ export const useFinanceStore = () => {
     setHasSeenTutorial(true);
   };
 
-  // Calculate budget allocations
-  const needsBudget = (budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100;
-  const wantsBudget = (budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100;
-  const responsibilitiesBudget = (budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100;
+  // CRITICAL: Calculate budget allocations with proper precision
+  const needsBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100 * 100) / 100;
+  const wantsBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.wantsPercentage) / 100 * 100) / 100;
+  const responsibilitiesBudget = Math.round((budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100 * 100) / 100;
 
-  // Calculate spent amounts by category
-  const needsSpent = transactions.filter(t => t.category === 'needs').reduce((sum, t) => sum + t.amount, 0);
-  const wantsSpent = transactions.filter(t => t.category === 'wants').reduce((sum, t) => sum + t.amount, 0);
-  const responsibilitiesSpent = transactions.filter(t => t.category === 'responsibilities').reduce((sum, t) => sum + t.amount, 0);
+  // CRITICAL: Calculate spent amounts by category with proper filtering
+  const needsSpent = transactions
+    .filter(t => t.category === 'needs')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const wantsSpent = transactions
+    .filter(t => t.category === 'wants')
+    .reduce((sum, t) => sum + t.amount, 0);
+  
+  const responsibilitiesSpent = transactions
+    .filter(t => t.category === 'responsibilities')
+    .reduce((sum, t) => sum + t.amount, 0);
 
   // Calculate fixed expenses total
   const fixedExpensesTotal = budgetSettings.fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // Calculate remaining amounts
-  const needsRemaining = needsBudget - needsSpent;
-  const wantsRemaining = wantsBudget - wantsSpent;
-  const responsibilitiesRemaining = responsibilitiesBudget - responsibilitiesSpent - fixedExpensesTotal;
+  // CRITICAL: Calculate remaining amounts with proper precision
+  const needsRemaining = Math.round((needsBudget - needsSpent) * 100) / 100;
+  const wantsRemaining = Math.round((wantsBudget - wantsSpent) * 100) / 100;
+  const responsibilitiesRemaining = Math.round((responsibilitiesBudget - responsibilitiesSpent - fixedExpensesTotal) * 100) / 100;
 
   // Calculate total remaining salary
   const totalSpent = needsSpent + wantsSpent + responsibilitiesSpent + fixedExpensesTotal;
-  const remainingSalary = budgetSettings.monthlyIncome - totalSpent;
+  const remainingSalary = Math.round((budgetSettings.monthlyIncome - totalSpent) * 100) / 100;
 
   // Calculate total allocated budget
   const totalAllocated = needsBudget + wantsBudget + responsibilitiesBudget;
@@ -487,7 +511,7 @@ export const useFinanceStore = () => {
     setWantWalletBalance,
     setWantWalletTransactions,
     setBankBalance,
-    // Calculated values
+    // CRITICAL: Calculated values with proper precision
     needsBudget,
     wantsBudget,
     responsibilitiesBudget,

@@ -19,6 +19,7 @@ const SettingsTab: React.FC = () => {
   } = useFinanceStore();
 
   const [formData, setFormData] = useState({
+    monthlyIncome: budgetSettings.monthlyIncome.toString(),
     needsPercentage: budgetSettings.needsPercentage.toString(),
     wantsPercentage: budgetSettings.wantsPercentage.toString(),
     responsibilitiesPercentage: budgetSettings.responsibilitiesPercentage.toString()
@@ -37,63 +38,88 @@ const SettingsTab: React.FC = () => {
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [activeTab, setActiveTab] = useState('budget');
 
-  // Update form data when budget settings change
+  // CRITICAL: Update form data when budget settings change
   useEffect(() => {
     setFormData({
+      monthlyIncome: budgetSettings.monthlyIncome.toString(),
       needsPercentage: budgetSettings.needsPercentage.toString(),
       wantsPercentage: budgetSettings.wantsPercentage.toString(),
       responsibilitiesPercentage: budgetSettings.responsibilitiesPercentage.toString()
     });
   }, [budgetSettings]);
 
-  // Auto-save when form data changes
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (formData.needsPercentage !== budgetSettings.needsPercentage.toString() ||
-          formData.wantsPercentage !== budgetSettings.wantsPercentage.toString() ||
-          formData.responsibilitiesPercentage !== budgetSettings.responsibilitiesPercentage.toString()) {
-        
-        const totalPercentage = parseFloat(formData.needsPercentage) + parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage);
-        if (Math.abs(totalPercentage - 100) < 0.1) {
-          updateBudgetSettings({
-            needsPercentage: parseFloat(formData.needsPercentage) || 0,
-            wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
-            responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
-          });
-        }
-      }
-    }, 1000); // Auto-save after 1 second of no changes
-
-    return () => clearTimeout(timeoutId);
-  }, [formData, budgetSettings, updateBudgetSettings]);
-
+  // CRITICAL: Handle percentage changes with proper validation and auto-adjustment
   const handlePercentageChange = (field: string, value: string) => {
     const numValue = parseFloat(value) || 0;
-    let newFormData = { ...formData, [field]: value };
+    
+    // Ensure value is within valid range
+    const clampedValue = Math.max(0, Math.min(100, numValue));
+    
+    let newFormData = { ...formData, [field]: clampedValue.toString() };
 
     // Auto-adjust other percentages to maintain 100% total
     if (field === 'needsPercentage') {
-      const remaining = 100 - numValue;
-      const wantsRatio = parseFloat(formData.wantsPercentage) / (parseFloat(formData.wantsPercentage) + parseFloat(formData.responsibilitiesPercentage)) || 0.5;
-      newFormData.wantsPercentage = Math.round(remaining * wantsRatio).toString();
-      newFormData.responsibilitiesPercentage = (remaining - Math.round(remaining * wantsRatio)).toString();
+      const remaining = 100 - clampedValue;
+      const currentWants = parseFloat(formData.wantsPercentage) || 0;
+      const currentResp = parseFloat(formData.responsibilitiesPercentage) || 0;
+      const currentTotal = currentWants + currentResp;
+      
+      if (currentTotal > 0) {
+        const wantsRatio = currentWants / currentTotal;
+        newFormData.wantsPercentage = Math.round(remaining * wantsRatio * 10) / 10;
+        newFormData.responsibilitiesPercentage = Math.round((remaining - (remaining * wantsRatio)) * 10) / 10;
+      } else {
+        newFormData.wantsPercentage = Math.round(remaining * 0.6 * 10) / 10; // 30/50 ratio
+        newFormData.responsibilitiesPercentage = Math.round(remaining * 0.4 * 10) / 10; // 20/50 ratio
+      }
     } else if (field === 'wantsPercentage') {
-      const remaining = 100 - parseFloat(formData.needsPercentage);
-      const adjustedValue = Math.min(numValue, remaining);
+      const needsPercent = parseFloat(formData.needsPercentage) || 0;
+      const maxAllowed = 100 - needsPercent;
+      const adjustedValue = Math.min(clampedValue, maxAllowed);
       newFormData.wantsPercentage = adjustedValue.toString();
-      newFormData.responsibilitiesPercentage = (remaining - adjustedValue).toString();
+      newFormData.responsibilitiesPercentage = (maxAllowed - adjustedValue).toString();
     } else if (field === 'responsibilitiesPercentage') {
-      const remaining = 100 - parseFloat(formData.needsPercentage);
-      const adjustedValue = Math.min(numValue, remaining);
+      const needsPercent = parseFloat(formData.needsPercentage) || 0;
+      const maxAllowed = 100 - needsPercent;
+      const adjustedValue = Math.min(clampedValue, maxAllowed);
       newFormData.responsibilitiesPercentage = adjustedValue.toString();
-      newFormData.wantsPercentage = (remaining - adjustedValue).toString();
+      newFormData.wantsPercentage = (maxAllowed - adjustedValue).toString();
     }
 
     setFormData(newFormData);
+    
+    // CRITICAL: Immediately save the changes
+    const totalPercentage = parseFloat(newFormData.needsPercentage) + 
+                           parseFloat(newFormData.wantsPercentage) + 
+                           parseFloat(newFormData.responsibilitiesPercentage);
+    
+    if (Math.abs(totalPercentage - 100) < 0.1) {
+      updateBudgetSettings({
+        monthlyIncome: parseFloat(newFormData.monthlyIncome) || 0,
+        needsPercentage: parseFloat(newFormData.needsPercentage) || 0,
+        wantsPercentage: parseFloat(newFormData.wantsPercentage) || 0,
+        responsibilitiesPercentage: parseFloat(newFormData.responsibilitiesPercentage) || 0
+      });
+    }
+  };
+
+  // CRITICAL: Handle monthly income changes
+  const handleIncomeChange = (value: string) => {
+    setFormData({ ...formData, monthlyIncome: value });
+    
+    // Save immediately
+    const income = parseFloat(value) || 0;
+    updateBudgetSettings({
+      monthlyIncome: income,
+      needsPercentage: parseFloat(formData.needsPercentage) || 0,
+      wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
+      responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
+    });
   };
 
   const handleSaveAll = () => {
     const newSettings = {
+      monthlyIncome: parseFloat(formData.monthlyIncome) || 0,
       needsPercentage: parseFloat(formData.needsPercentage) || 0,
       wantsPercentage: parseFloat(formData.wantsPercentage) || 0,
       responsibilitiesPercentage: parseFloat(formData.responsibilitiesPercentage) || 0
@@ -168,6 +194,34 @@ const SettingsTab: React.FC = () => {
 
   const renderBudgetSettings = () => (
     <div className="space-y-8">
+      {/* Monthly Income */}
+      <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
+        <div className="flex items-center space-x-3 mb-6">
+          <div className="p-3 bg-emerald-100 rounded-xl">
+            <Calculator className="h-6 w-6 text-emerald-600" />
+          </div>
+          <h2 className="text-xl font-semibold text-slate-800">Monthly Income</h2>
+        </div>
+        
+        <div className="max-w-md">
+          <label className="block text-sm font-medium text-slate-700 mb-2">
+            Total Monthly Income (FJD)
+          </label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-500">$</span>
+            <input
+              type="number"
+              step="0.01"
+              value={formData.monthlyIncome}
+              onChange={(e) => handleIncomeChange(e.target.value)}
+              className="w-full pl-8 pr-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+              placeholder="0.00"
+            />
+          </div>
+          <p className="text-xs text-slate-500 mt-1">Changes are automatically saved</p>
+        </div>
+      </div>
+
       {/* Budget Allocation */}
       <div className="bg-white rounded-2xl shadow-xl border border-slate-200 p-8">
         <div className="flex items-center space-x-3 mb-6">
@@ -191,18 +245,23 @@ const SettingsTab: React.FC = () => {
                     type="number"
                     min="0"
                     max="100"
+                    step="0.1"
                     value={formData.needsPercentage}
                     onChange={(e) => handlePercentageChange('needsPercentage', e.target.value)}
                     className="w-20 px-3 py-2 text-center border border-emerald-300 rounded-lg focus:ring-2 focus:ring-emerald-500"
                   />
                   <span className="text-emerald-700 font-medium">%</span>
                 </div>
+                <p className="text-sm text-emerald-600 mt-1">
+                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.needsPercentage) || 0) / 100).toFixed(2)}
+                </p>
               </div>
             </div>
             <input
               type="range"
               min="0"
               max="100"
+              step="0.1"
               value={formData.needsPercentage}
               onChange={(e) => handlePercentageChange('needsPercentage', e.target.value)}
               className="w-full h-3 bg-emerald-200 rounded-lg appearance-none cursor-pointer slider-emerald"
@@ -222,18 +281,23 @@ const SettingsTab: React.FC = () => {
                     type="number"
                     min="0"
                     max={100 - parseFloat(formData.needsPercentage)}
+                    step="0.1"
                     value={formData.wantsPercentage}
                     onChange={(e) => handlePercentageChange('wantsPercentage', e.target.value)}
                     className="w-20 px-3 py-2 text-center border border-amber-300 rounded-lg focus:ring-2 focus:ring-amber-500"
                   />
                   <span className="text-amber-700 font-medium">%</span>
                 </div>
+                <p className="text-sm text-amber-600 mt-1">
+                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.wantsPercentage) || 0) / 100).toFixed(2)}
+                </p>
               </div>
             </div>
             <input
               type="range"
               min="0"
               max={100 - parseFloat(formData.needsPercentage)}
+              step="0.1"
               value={formData.wantsPercentage}
               onChange={(e) => handlePercentageChange('wantsPercentage', e.target.value)}
               className="w-full h-3 bg-amber-200 rounded-lg appearance-none cursor-pointer slider-amber"
@@ -253,18 +317,23 @@ const SettingsTab: React.FC = () => {
                     type="number"
                     min="0"
                     max={100 - parseFloat(formData.needsPercentage)}
+                    step="0.1"
                     value={formData.responsibilitiesPercentage}
                     onChange={(e) => handlePercentageChange('responsibilitiesPercentage', e.target.value)}
                     className="w-20 px-3 py-2 text-center border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500"
                   />
                   <span className="text-blue-700 font-medium">%</span>
                 </div>
+                <p className="text-sm text-blue-600 mt-1">
+                  ${((parseFloat(formData.monthlyIncome) || 0) * (parseFloat(formData.responsibilitiesPercentage) || 0) / 100).toFixed(2)}
+                </p>
               </div>
             </div>
             <input
               type="range"
               min="0"
               max={100 - parseFloat(formData.needsPercentage)}
+              step="0.1"
               value={formData.responsibilitiesPercentage}
               onChange={(e) => handlePercentageChange('responsibilitiesPercentage', e.target.value)}
               className="w-full h-3 bg-blue-200 rounded-lg appearance-none cursor-pointer slider-blue"
@@ -284,13 +353,19 @@ const SettingsTab: React.FC = () => {
               <span className={`text-xl font-bold ${
                 isValidPercentage ? 'text-emerald-800' : 'text-red-800'
               }`}>
-                {Math.round(totalPercentage)}%
+                {totalPercentage.toFixed(1)}%
               </span>
             </div>
             {!isValidPercentage && (
               <p className="text-sm text-red-600 mt-1">
                 Adjust percentages to reach exactly 100%
               </p>
+            )}
+            {isValidPercentage && (
+              <div className="flex items-center space-x-2 mt-2 text-emerald-600">
+                <CheckCircle className="h-4 w-4" />
+                <span className="text-sm font-medium">Perfect! Budget is balanced.</span>
+              </div>
             )}
           </div>
         </div>
