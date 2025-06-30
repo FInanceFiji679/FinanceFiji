@@ -3,11 +3,7 @@ import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
 import IncomeTab from './components/Income/IncomeTab';
 import TransactionManager from './components/Transactions/TransactionManager';
-import NeedsTab from './components/Tracking/NeedsTab';
-import WantsTab from './components/Tracking/WantsTab';
-import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
 import WantWalletTab from './components/Tracking/WantWalletTab';
-import BankTab from './components/Tracking/BankTab';
 import ReportsTab from './components/Reports/ReportsTab';
 import SettingsTab from './components/Settings/SettingsTab';
 import TutorialModal from './components/Tutorial/TutorialModal';
@@ -40,16 +36,8 @@ function App() {
         return <IncomeTab />;
       case 'transactions':
         return <TransactionManager />;
-      case 'needs':
-        return <NeedsTab />;
-      case 'wants':
-        return <WantsTab />;
-      case 'responsibilities':
-        return <ResponsibilitiesTab />;
       case 'want-wallet':
         return <WantWalletTab />;
-      case 'bank':
-        return <BankTab />;
       case 'reports':
         return <ReportsTab />;
       case 'settings':
