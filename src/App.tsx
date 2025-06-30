@@ -3,11 +3,7 @@ import Header from './components/Layout/Header';
 import Dashboard from './components/Dashboard/Dashboard';
 import IncomeTab from './components/Income/IncomeTab';
 import TransactionManager from './components/Transactions/TransactionManager';
-import NeedsTab from './components/Tracking/NeedsTab';
-import WantsTab from './components/Tracking/WantsTab';
-import ResponsibilitiesTab from './components/Tracking/ResponsibilitiesTab';
 import WantWalletTab from './components/Tracking/WantWalletTab';
-import BankTab from './components/Tracking/BankTab';
 import ReportsTab from './components/Reports/ReportsTab';
 import SettingsTab from './components/Settings/SettingsTab';
 import TutorialModal from './components/Tutorial/TutorialModal';
@@ -21,7 +17,6 @@ function App() {
   const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
-    // Simulate app initialization
     const timer = setTimeout(() => {
       setIsLoading(false);
       if (!hasSeenTutorial) {
@@ -35,27 +30,19 @@ function App() {
   const renderCurrentView = () => {
     switch (currentView) {
       case 'dashboard':
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentView} />;
       case 'income':
         return <IncomeTab />;
       case 'transactions':
         return <TransactionManager />;
-      case 'needs':
-        return <NeedsTab />;
-      case 'wants':
-        return <WantsTab />;
-      case 'responsibilities':
-        return <ResponsibilitiesTab />;
       case 'want-wallet':
         return <WantWalletTab />;
-      case 'bank':
-        return <BankTab />;
       case 'reports':
         return <ReportsTab />;
       case 'settings':
         return <SettingsTab />;
       default:
-        return <Dashboard />;
+        return <Dashboard onNavigate={setCurrentView} />;
     }
   };
 
@@ -64,27 +51,11 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 relative overflow-hidden">
-      {/* Fiji-inspired background pattern */}
-      <div className="absolute inset-0 opacity-5">
-        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-blue-600 to-emerald-600"></div>
-        <svg className="absolute inset-0 w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-          <defs>
-            <pattern id="fiji-pattern" x="0" y="0" width="20" height="20" patternUnits="userSpaceOnUse">
-              <circle cx="10" cy="10" r="2" fill="currentColor" opacity="0.1"/>
-              <path d="M5,5 L15,15 M15,5 L5,15" stroke="currentColor" strokeWidth="0.5" opacity="0.1"/>
-            </pattern>
-          </defs>
-          <rect width="100%" height="100%" fill="url(#fiji-pattern)"/>
-        </svg>
-      </div>
-
+    <div className="min-h-screen bg-gray-50">
       <Header currentView={currentView} onViewChange={setCurrentView} />
       
-      <main className="relative z-10 w-full px-3 sm:px-4 lg:px-6 py-4 sm:py-6 lg:py-8 max-w-7xl mx-auto">
-        <div className="w-full">
-          {renderCurrentView()}
-        </div>
+      <main className="container mx-auto px-4 py-6 max-w-4xl">
+        {renderCurrentView()}
       </main>
       
       <TutorialModal

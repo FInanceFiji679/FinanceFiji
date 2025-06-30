@@ -1,313 +1,192 @@
 import React from 'react';
-import { Wallet, TrendingUp, PiggyBank, CreditCard, Target, AlertTriangle, Building2, DollarSign } from 'lucide-react';
-import DashboardCard from './DashboardCard';
-import RecentTransactions from './RecentTransactions';
-import FNPFSummary from './FNPFSummary';
-import QuickActions from './QuickActions';
+import { TrendingUp, TrendingDown, DollarSign, PiggyBank, Plus, ArrowRight } from 'lucide-react';
 import { useFinanceStore } from '../../hooks/useFinanceStore';
 
-const Dashboard: React.FC = () => {
+interface DashboardProps {
+  onNavigate?: (view: string) => void;
+}
+
+const Dashboard: React.FC<DashboardProps> = ({ onNavigate }) => {
   const { 
     budgetSettings, 
-    transactions, 
-    wantWalletBalance, 
-    bankBalance, 
-    goals,
     needsBudget,
     wantsBudget,
     responsibilitiesBudget,
     needsSpent,
     wantsSpent,
     responsibilitiesSpent,
-    totalSpent,
     remainingSalary,
-    fixedExpensesTotal
+    wantWalletBalance,
+    bankBalance,
+    transactions
   } = useFinanceStore();
 
-  // Calculate monthly income from budget settings (not transactions)
+  const recentTransactions = transactions.slice(0, 3);
   const monthlyIncome = budgetSettings.monthlyIncome;
-  const monthlyExpenses = totalSpent + fixedExpensesTotal;
-  const monthlyNet = monthlyIncome - monthlyExpenses;
 
-  const activeGoals = goals.filter(g => !g.isCompleted);
-  const completedGoals = goals.filter(g => g.isCompleted);
+  // Quick stats
+  const stats = [
+    {
+      label: 'Income',
+      value: monthlyIncome,
+      color: 'text-emerald-600',
+      bg: 'bg-emerald-50'
+    },
+    {
+      label: 'Remaining',
+      value: remainingSalary,
+      color: remainingSalary >= 0 ? 'text-blue-600' : 'text-red-600',
+      bg: remainingSalary >= 0 ? 'bg-blue-50' : 'bg-red-50'
+    },
+    {
+      label: 'Want Wallet',
+      value: wantWalletBalance,
+      color: 'text-purple-600',
+      bg: 'bg-purple-50'
+    },
+    {
+      label: 'Bank',
+      value: bankBalance,
+      color: bankBalance >= 0 ? 'text-indigo-600' : 'text-red-600',
+      bg: bankBalance >= 0 ? 'bg-indigo-50' : 'bg-red-50'
+    }
+  ];
 
-  // Budget utilization percentages
-  const needsUtilization = needsBudget > 0 ? (needsSpent / needsBudget) * 100 : 0;
-  const wantsUtilization = wantsBudget > 0 ? (wantsSpent / wantsBudget) * 100 : 0;
-  const responsibilitiesUtilization = responsibilitiesBudget > 0 ? (responsibilitiesSpent / responsibilitiesBudget) * 100 : 0;
-
-  // Alerts
-  const alerts = [];
-  if (needsUtilization > 90) alerts.push({ type: 'warning', message: 'Needs budget almost exhausted' });
-  if (wantsUtilization > 100) alerts.push({ type: 'error', message: 'Wants budget exceeded' });
-  if (remainingSalary < 0) alerts.push({ type: 'error', message: 'Monthly budget exceeded' });
-  if (monthlyIncome === 0) alerts.push({ type: 'info', message: 'Set up your monthly income in the Income tab' });
+  const budgetItems = [
+    {
+      name: 'Needs',
+      spent: needsSpent,
+      budget: needsBudget,
+      color: 'emerald',
+      percentage: needsBudget > 0 ? (needsSpent / needsBudget) * 100 : 0
+    },
+    {
+      name: 'Wants',
+      spent: wantsSpent,
+      budget: wantsBudget,
+      color: 'amber',
+      percentage: wantsBudget > 0 ? (wantsSpent / wantsBudget) * 100 : 0
+    },
+    {
+      name: 'Savings',
+      spent: responsibilitiesSpent,
+      budget: responsibilitiesBudget,
+      color: 'blue',
+      percentage: responsibilitiesBudget > 0 ? (responsibilitiesSpent / responsibilitiesBudget) * 100 : 0
+    }
+  ];
 
   return (
-    <div className="space-y-8">
-      {/* Welcome Section */}
-      <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 rounded-2xl shadow-xl text-white p-8 relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16"></div>
-        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full -ml-12 -mb-12"></div>
-        
-        <div className="relative z-10">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome to Finance Fiji</h1>
-              <p className="text-blue-100 text-lg">Your comprehensive financial dashboard</p>
-              <div className="mt-4 flex items-center space-x-6">
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{transactions.length}</p>
-                  <p className="text-blue-200 text-sm">Transactions</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{activeGoals.length}</p>
-                  <p className="text-blue-200 text-sm">Active Goals</p>
-                </div>
-                <div className="text-center">
-                  <p className="text-2xl font-bold">{completedGoals.length}</p>
-                  <p className="text-blue-200 text-sm">Completed</p>
-                </div>
-              </div>
-            </div>
-            <div className="hidden md:block">
-              <div className="w-32 h-32 bg-white/10 rounded-full flex items-center justify-center">
-                <Wallet className="h-16 w-16 text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
+    <div className="pb-20 md:pb-0">
+      {/* Welcome Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6 rounded-2xl mb-6">
+        <h1 className="text-2xl font-bold mb-2">Welcome Back!</h1>
+        <p className="text-blue-100">Here's your financial overview</p>
       </div>
 
-      {/* Alerts Section */}
-      {alerts.length > 0 && (
-        <div className="space-y-3">
-          {alerts.map((alert, index) => (
-            <div key={index} className={`p-4 rounded-xl border ${
-              alert.type === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 
-              alert.type === 'warning' ? 'bg-amber-50 border-amber-200 text-amber-800' :
-              'bg-blue-50 border-blue-200 text-blue-800'
-            }`}>
-              <div className="flex items-center space-x-3">
-                <AlertTriangle className="h-5 w-5" />
-                <span className="font-medium">{alert.message}</span>
+      {/* Quick Stats */}
+      <div className="grid grid-cols-2 gap-4 mb-6">
+        {stats.map((stat, index) => (
+          <div key={index} className={`${stat.bg} p-4 rounded-xl`}>
+            <p className="text-sm font-medium text-gray-600">{stat.label}</p>
+            <p className={`text-xl font-bold ${stat.color}`}>
+              ${stat.value.toFixed(2)}
+            </p>
+          </div>
+        ))}
+      </div>
+
+      {/* Budget Progress */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Budget Progress</h2>
+        <div className="space-y-4">
+          {budgetItems.map((item) => (
+            <div key={item.name}>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-medium text-gray-700">{item.name}</span>
+                <span className="text-sm text-gray-600">
+                  ${item.spent.toFixed(0)} / ${item.budget.toFixed(0)}
+                </span>
+              </div>
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div
+                  className={`h-2 rounded-full bg-${item.color}-500 transition-all`}
+                  style={{ width: `${Math.min(item.percentage, 100)}%` }}
+                />
               </div>
             </div>
           ))}
         </div>
-      )}
-
-      {/* Key Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <DashboardCard
-          title="Monthly Income"
-          value={`$${monthlyIncome.toFixed(2)}`}
-          icon={TrendingUp}
-          color="green"
-          trend={{ value: 0, isPositive: true }}
-        />
-        <DashboardCard
-          title="Monthly Expenses"
-          value={`$${monthlyExpenses.toFixed(2)}`}
-          icon={CreditCard}
-          color="red"
-          trend={{ value: 0, isPositive: false }}
-        />
-        <DashboardCard
-          title="Want Wallet"
-          value={`$${wantWalletBalance.toFixed(2)}`}
-          icon={PiggyBank}
-          color="purple"
-          trend={{ value: 0, isPositive: true }}
-        />
-        <DashboardCard
-          title="Bank Balance"
-          value={`$${bankBalance.toFixed(2)}`}
-          icon={Building2}
-          color={bankBalance >= 0 ? 'blue' : 'red'}
-        />
       </div>
 
-      {/* Budget Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-6">Budget Overview</h3>
-          <div className="space-y-6">
-            {/* Needs */}
-            <div className="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-emerald-100 rounded-lg">
-                    <Target className="h-5 w-5 text-emerald-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-emerald-900">Needs</h4>
-                    <p className="text-sm text-emerald-600">Essential expenses</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-emerald-700">${needsSpent.toFixed(2)}</p>
-                  <p className="text-sm text-emerald-600">of ${needsBudget.toFixed(2)}</p>
-                </div>
-              </div>
-              <div className="w-full bg-emerald-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all ${needsUtilization > 100 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                  style={{ width: `${Math.min(needsUtilization, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-emerald-600 mt-1">{needsUtilization.toFixed(1)}% utilized</p>
-            </div>
-
-            {/* Wants */}
-            <div className="p-4 bg-amber-50 rounded-xl border border-amber-200">
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-amber-100 rounded-lg">
-                    <Target className="h-5 w-5 text-amber-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-amber-900">Wants</h4>
-                    <p className="text-sm text-amber-600">Lifestyle expenses</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-amber-700">${wantsSpent.toFixed(2)}</p>
-                  <p className="text-sm text-amber-600">of ${wantsBudget.toFixed(2)}</p>
-                </div>
-              </div>
-              <div className="w-full bg-amber-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all ${wantsUtilization > 100 ? 'bg-red-500' : 'bg-amber-500'}`}
-                  style={{ width: `${Math.min(wantsUtilization, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-amber-600 mt-1">{wantsUtilization.toFixed(1)}% utilized</p>
-            </div>
-
-            {/* Responsibilities */}
-            <div className="p-4 bg-blue-50 rounded-xl border border-blue-200">
-              <div className="flex justify-between items-center mb-3">
-                <div className="flex items-center space-x-3">
-                  <div className="p-2 bg-blue-100 rounded-lg">
-                    <Target className="h-5 w-5 text-blue-600" />
-                  </div>
-                  <div>
-                    <h4 className="font-semibold text-blue-900">Savings</h4>
-                    <p className="text-sm text-blue-600">Savings & investments</p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-lg font-bold text-blue-700">${responsibilitiesSpent.toFixed(2)}</p>
-                  <p className="text-sm text-blue-600">of ${responsibilitiesBudget.toFixed(2)}</p>
-                </div>
-              </div>
-              <div className="w-full bg-blue-200 rounded-full h-2">
-                <div
-                  className={`h-2 rounded-full transition-all ${responsibilitiesUtilization > 100 ? 'bg-red-500' : 'bg-blue-500'}`}
-                  style={{ width: `${Math.min(responsibilitiesUtilization, 100)}%` }}
-                />
-              </div>
-              <p className="text-xs text-blue-600 mt-1">{responsibilitiesUtilization.toFixed(1)}% utilized</p>
-            </div>
-
-            {/* Fixed Expenses */}
-            {fixedExpensesTotal > 0 && (
-              <div className="p-4 bg-purple-50 rounded-xl border border-purple-200">
-                <div className="flex justify-between items-center">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Target className="h-5 w-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-purple-900">Fixed Expenses</h4>
-                      <p className="text-sm text-purple-600">Recurring monthly costs</p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p className="text-lg font-bold text-purple-700">${fixedExpensesTotal.toFixed(2)}</p>
-                    <p className="text-sm text-purple-600">Auto-deducted</p>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          {/* FNPF Summary */}
-          <FNPFSummary />
-          
-          {/* Quick Actions */}
-          <QuickActions />
+      {/* Quick Actions */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 mb-6">
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <button
+            onClick={() => onNavigate?.('income')}
+            className="flex items-center justify-center space-x-2 p-4 bg-emerald-50 text-emerald-700 rounded-xl hover:bg-emerald-100 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="font-medium">Add Income</span>
+          </button>
+          <button
+            onClick={() => onNavigate?.('transactions')}
+            className="flex items-center justify-center space-x-2 p-4 bg-blue-50 text-blue-700 rounded-xl hover:bg-blue-100 transition-colors"
+          >
+            <Plus className="h-5 w-5" />
+            <span className="font-medium">Add Expense</span>
+          </button>
         </div>
       </div>
 
-      {/* Recent Activity and Goals */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Recent Transactions</h3>
-          <RecentTransactions transactions={transactions.slice(0, 5)} />
+      {/* Recent Transactions */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900">Recent Activity</h2>
+          <button
+            onClick={() => onNavigate?.('transactions')}
+            className="flex items-center space-x-1 text-blue-600 hover:text-blue-700"
+          >
+            <span className="text-sm font-medium">View All</span>
+            <ArrowRight className="h-4 w-4" />
+          </button>
         </div>
-
-        <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-          <h3 className="text-xl font-semibold text-gray-900 mb-4">Financial Goals</h3>
-          {activeGoals.length > 0 ? (
-            <div className="space-y-4">
-              {activeGoals.slice(0, 3).map(goal => {
-                const progress = goal.targetAmount > 0 ? (goal.currentAmount / goal.targetAmount) * 100 : 0;
-                return (
-                  <div key={goal.id} className="p-4 bg-gray-50 rounded-lg">
-                    <div className="flex justify-between items-center mb-2">
-                      <h4 className="font-medium text-gray-900">{goal.name}</h4>
-                      <span className="text-sm text-gray-600">{Math.round(progress)}%</span>
-                    </div>
-                    <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
-                      <div
-                        className="bg-gradient-to-r from-emerald-500 to-blue-500 h-2 rounded-full transition-all"
-                        style={{ width: `${Math.min(progress, 100)}%` }}
-                      />
-                    </div>
-                    <div className="flex justify-between text-sm text-gray-600">
-                      <span>${goal.currentAmount.toFixed(2)}</span>
-                      <span>${goal.targetAmount.toFixed(2)}</span>
-                    </div>
+        
+        {recentTransactions.length > 0 ? (
+          <div className="space-y-3">
+            {recentTransactions.map((transaction) => (
+              <div key={transaction.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div className="flex items-center space-x-3">
+                  <div className={`p-2 rounded-lg ${
+                    transaction.category === 'needs' ? 'bg-emerald-100' :
+                    transaction.category === 'wants' ? 'bg-amber-100' : 'bg-blue-100'
+                  }`}>
+                    <TrendingDown className={`h-4 w-4 ${
+                      transaction.category === 'needs' ? 'text-emerald-600' :
+                      transaction.category === 'wants' ? 'text-amber-600' : 'text-blue-600'
+                    }`} />
                   </div>
-                );
-              })}
-            </div>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Target className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-              <p>No active goals</p>
-              <button className="mt-2 text-blue-600 hover:text-blue-700 font-medium">
-                Create your first goal
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Financial Summary */}
-      <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Monthly Financial Summary</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center p-4 bg-emerald-50 rounded-lg">
-            <h4 className="font-medium text-emerald-900">Total Income</h4>
-            <p className="text-2xl font-bold text-emerald-600">${monthlyIncome.toFixed(2)}</p>
+                  <div>
+                    <p className="font-medium text-gray-900 text-sm">{transaction.description}</p>
+                    <p className="text-xs text-gray-500">{transaction.category}</p>
+                  </div>
+                </div>
+                <span className="font-semibold text-gray-900">${transaction.amount.toFixed(2)}</span>
+              </div>
+            ))}
           </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg">
-            <h4 className="font-medium text-red-900">Total Expenses</h4>
-            <p className="text-2xl font-bold text-red-600">${monthlyExpenses.toFixed(2)}</p>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <p>No transactions yet</p>
+            <button
+              onClick={() => onNavigate?.('transactions')}
+              className="mt-2 text-blue-600 hover:text-blue-700 font-medium"
+            >
+              Add your first transaction
+            </button>
           </div>
-          <div className="text-center p-4 bg-blue-50 rounded-lg">
-            <h4 className="font-medium text-blue-900">Net Position</h4>
-            <p className={`text-2xl font-bold ${monthlyNet >= 0 ? 'text-blue-600' : 'text-red-600'}`}>
-              ${monthlyNet.toFixed(2)}
-            </p>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
