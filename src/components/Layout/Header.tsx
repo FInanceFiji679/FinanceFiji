@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Settings, FileText, Wallet, PiggyBank, Menu, X, ChevronDown, DollarSign, BarChart3 } from 'lucide-react';
+import { Settings, Heart, ShoppingBag, Shield, FileText, Wallet, PiggyBank, Building2, Menu, X, ChevronDown, DollarSign, BarChart3 } from 'lucide-react';
 
 interface HeaderProps {
   currentView: string;
@@ -11,9 +11,13 @@ const Header: React.FC<HeaderProps> = ({ currentView, onViewChange }) => {
 
   const navItems = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3, color: 'blue', description: 'Financial overview' },
-    { id: 'income', label: 'Income', icon: DollarSign, color: 'green', description: 'Income & budget settings' },
-    { id: 'transactions', label: 'Transactions', icon: FileText, color: 'slate', description: 'All financial transactions' },
-    { id: 'want-wallet', label: 'Want Wallet', icon: PiggyBank, color: 'pink', description: 'Savings from unspent wants' },
+    { id: 'income', label: 'Income', icon: DollarSign, color: 'green', description: 'Salary & additional income' },
+    { id: 'transactions', label: 'Transactions', icon: FileText, color: 'slate', description: 'Complete transaction management' },
+    { id: 'needs', label: 'Needs', icon: Heart, color: 'emerald', description: 'Essential expenses' },
+    { id: 'wants', label: 'Wants', icon: ShoppingBag, color: 'amber', description: 'Entertainment & lifestyle' },
+    { id: 'responsibilities', label: 'Responsibilities', icon: Shield, color: 'blue', description: 'Savings & investments' },
+    { id: 'want-wallet', label: 'Want Wallet', icon: PiggyBank, color: 'pink', description: 'Accumulated savings' },
+    { id: 'bank', label: 'Bank', icon: Building2, color: 'indigo', description: 'Account balance' },
     { id: 'reports', label: 'Reports', icon: FileText, color: 'purple', description: 'Financial insights' }
   ];
 

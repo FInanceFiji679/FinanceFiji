@@ -68,7 +68,7 @@ export interface Achievement {
   type: 'savings' | 'goal' | 'streak' | 'milestone';
 }
 
-const STORAGE_KEY = 'finance-fiji-data';
+const STORAGE_KEY = 'financeflow-data';
 
 const defaultBudgetSettings: BudgetSettings = {
   monthlyIncome: 0,
@@ -127,7 +127,7 @@ export const useFinanceStore = () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
   }, [budgetSettings, transactions, monthlyArchive, wantWalletBalance, wantWalletTransactions, bankBalance, goals, achievements, hasSeenTutorial]);
 
-  // Update budget settings with validation
+  // CRITICAL: Fix budget settings update to ensure proper saving and validation
   const updateBudgetSettings = (newSettings: Partial<BudgetSettings>) => {
     setBudgetSettings(prev => {
       const updated = { ...prev, ...newSettings };
@@ -457,7 +457,7 @@ export const useFinanceStore = () => {
     setHasSeenTutorial(true);
   };
 
-  // Calculate budget allocations with proper precision and validation
+  // CRITICAL: Calculate budget allocations with proper precision and validation
   const needsBudget = budgetSettings.monthlyIncome > 0 ? 
     Math.round((budgetSettings.monthlyIncome * budgetSettings.needsPercentage) / 100 * 100) / 100 : 0;
   
@@ -467,7 +467,7 @@ export const useFinanceStore = () => {
   const responsibilitiesBudget = budgetSettings.monthlyIncome > 0 ? 
     Math.round((budgetSettings.monthlyIncome * budgetSettings.responsibilitiesPercentage) / 100 * 100) / 100 : 0;
 
-  // Calculate spent amounts by category with proper filtering
+  // CRITICAL: Calculate spent amounts by category with proper filtering
   const needsSpent = transactions
     .filter(t => t.category === 'needs')
     .reduce((sum, t) => sum + t.amount, 0);
@@ -483,7 +483,7 @@ export const useFinanceStore = () => {
   // Calculate fixed expenses total
   const fixedExpensesTotal = budgetSettings.fixedExpenses.reduce((sum, e) => sum + e.amount, 0);
 
-  // Calculate remaining amounts with proper precision
+  // CRITICAL: Calculate remaining amounts with proper precision
   const needsRemaining = Math.round((needsBudget - needsSpent) * 100) / 100;
   const wantsRemaining = Math.round((wantsBudget - wantsSpent) * 100) / 100;
   const responsibilitiesRemaining = Math.round((responsibilitiesBudget - responsibilitiesSpent - fixedExpensesTotal) * 100) / 100;
@@ -522,7 +522,7 @@ export const useFinanceStore = () => {
     setWantWalletBalance,
     setWantWalletTransactions,
     setBankBalance,
-    // Calculated values with proper precision and validation
+    // CRITICAL: Calculated values with proper precision and validation
     needsBudget,
     wantsBudget,
     responsibilitiesBudget,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, ArrowRight, ArrowLeft, CheckCircle, Target, PiggyBank, DollarSign, TrendingUp, Building2, FileText } from 'lucide-react';
+import { X, ArrowRight, ArrowLeft, CheckCircle, Target, PiggyBank, Heart, ShoppingBag, Shield, TrendingUp, Building2, DollarSign } from 'lucide-react';
 
 interface TutorialModalProps {
   isOpen: boolean;
@@ -17,7 +17,7 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
         <div className="text-center space-y-4">
           <div className="text-6xl mb-4">🏝️</div>
           <p className="text-lg text-gray-700">
-            Your simple and efficient personal finance management system designed specifically for Fiji. 
+            Your comprehensive personal finance management system designed specifically for Fiji. 
             Take control of your money with precision and cultural relevance.
           </p>
           <div className="bg-blue-50 p-4 rounded-lg">
@@ -25,68 +25,6 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
               <strong>Why Finance Fiji?</strong> Built with Fiji's financial landscape in mind, 
               including FNPF calculations, local banking integration, and the proven 50/30/20 budgeting rule.
             </p>
-          </div>
-        </div>
-      )
-    },
-    {
-      title: "Simple 5-Tab System",
-      content: (
-        <div className="space-y-6">
-          <div className="text-center">
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Everything You Need in 5 Tabs</h3>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
-              <div className="p-2 bg-blue-500 rounded-lg">
-                <DollarSign className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-blue-900">Dashboard</h4>
-                <p className="text-sm text-blue-700">Your financial overview at a glance</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
-              <div className="p-2 bg-emerald-500 rounded-lg">
-                <TrendingUp className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-emerald-900">Income</h4>
-                <p className="text-sm text-emerald-700">Set income and budget allocations</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
-              <div className="p-2 bg-purple-500 rounded-lg">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-purple-900">Transactions</h4>
-                <p className="text-sm text-purple-700">Track all your spending in one place</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-pink-50 rounded-lg border border-pink-200">
-              <div className="p-2 bg-pink-500 rounded-lg">
-                <PiggyBank className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-pink-900">Want Wallet</h4>
-                <p className="text-sm text-pink-700">Your automatic savings from unspent wants</p>
-              </div>
-            </div>
-            
-            <div className="flex items-center space-x-4 p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-              <div className="p-2 bg-indigo-500 rounded-lg">
-                <FileText className="h-6 w-6 text-white" />
-              </div>
-              <div>
-                <h4 className="font-semibold text-indigo-900">Reports</h4>
-                <p className="text-sm text-indigo-700">Monthly summaries and insights</p>
-              </div>
-            </div>
           </div>
         </div>
       )
@@ -119,6 +57,40 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
                 <li>• Retirement planning insights</li>
                 <li>• Tax-efficient financial planning</li>
               </ul>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: "The 50/30/20 Budget Rule",
+      content: (
+        <div className="space-y-6">
+          <p className="text-gray-700">Finance Fiji uses the proven 50/30/20 budgeting framework, adapted for Fiji's lifestyle:</p>
+          
+          <div className="grid grid-cols-1 gap-4">
+            <div className="flex items-center space-x-4 p-4 bg-emerald-50 rounded-lg border border-emerald-200">
+              <Heart className="h-8 w-8 text-emerald-600" />
+              <div>
+                <h4 className="font-semibold text-emerald-800">50% - Needs</h4>
+                <p className="text-sm text-emerald-600">Housing, groceries, utilities, transport, FNPF contributions</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4 p-4 bg-amber-50 rounded-lg border border-amber-200">
+              <ShoppingBag className="h-8 w-8 text-amber-600" />
+              <div>
+                <h4 className="font-semibold text-amber-800">30% - Wants</h4>
+                <p className="text-sm text-amber-600">Dining out, entertainment, kava sessions, shopping</p>
+              </div>
+            </div>
+            
+            <div className="flex items-center space-x-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+              <Shield className="h-8 w-8 text-blue-600" />
+              <div>
+                <h4 className="font-semibold text-blue-800">20% - Responsibilities</h4>
+                <p className="text-sm text-blue-600">Emergency fund, investments, extra FNPF, family support</p>
+              </div>
             </div>
           </div>
         </div>
@@ -162,6 +134,43 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
       )
     },
     {
+      title: "Smart Transaction Tracking",
+      content: (
+        <div className="space-y-6">
+          <div className="text-center">
+            <TrendingUp className="h-16 w-16 mx-auto text-emerald-600 mb-4" />
+            <h3 className="text-xl font-semibold text-gray-900 mb-2">Precision Tracking Made Easy</h3>
+          </div>
+          
+          <div className="space-y-4">
+            <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-200">
+              <h4 className="font-semibold text-emerald-800 mb-2">Automatic Categorization</h4>
+              <p className="text-sm text-emerald-700">
+                Smart categorization helps you understand where your money goes. 
+                Track groceries, fuel, entertainment, and more with just a few taps.
+              </p>
+            </div>
+            
+            <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+              <h4 className="font-semibold text-blue-800 mb-2">Multi-Wallet Support</h4>
+              <p className="text-sm text-blue-700">
+                Track money across ANZ, Westpac, BSP, MPAiSA, and cash. 
+                See your complete financial picture in one place.
+              </p>
+            </div>
+            
+            <div className="bg-purple-50 p-4 rounded-lg border border-purple-200">
+              <h4 className="font-semibold text-purple-800 mb-2">Real-time Insights</h4>
+              <p className="text-sm text-purple-700">
+                Get instant feedback on your spending patterns, budget progress, 
+                and savings opportunities. Make informed decisions in real-time.
+              </p>
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
       title: "You're Ready to Start! 🚀",
       content: (
         <div className="text-center space-y-6">
@@ -175,26 +184,26 @@ const TutorialModal: React.FC<TutorialModalProps> = ({ isOpen, onClose, onComple
             <div className="space-y-3 text-left">
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Start with Income tab to set your monthly income</span>
+                <span className="text-sm text-gray-700">Every dollar saved in wants becomes future opportunities</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Use Transactions tab to record all spending</span>
+                <span className="text-sm text-gray-700">FNPF contributions are automatically calculated and tracked</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">Watch your Want Wallet grow with smart choices</span>
+                <span className="text-sm text-gray-700">Your financial goals are now achievable and measurable</span>
               </div>
               <div className="flex items-center space-x-3">
                 <CheckCircle className="h-5 w-5 text-emerald-600" />
-                <span className="text-sm text-gray-700">FNPF contributions are automatically calculated</span>
+                <span className="text-sm text-gray-700">Smart budgeting leads to financial independence</span>
               </div>
             </div>
           </div>
           
           <div className="bg-amber-50 p-4 rounded-lg border border-amber-200">
             <p className="text-amber-800 font-medium">
-              🏝️ Start by setting up your income, then begin tracking your first transaction!
+              🏝️ Start by setting up your income in the Income tab, then begin tracking your first transaction!
             </p>
           </div>
         </div>
